@@ -1,6 +1,6 @@
-# GentleBreath Pet Project - Presentation Materials
+# pet-project-artifacts
 
-Этот репозиторий содержит материалы презентаций и артефакты для пет-проекта GentleBreath.
+Репозиторий для хранения материалов презентаций и артефактов пет-проекта GentleBreath.
 
 ## Содержание
 
