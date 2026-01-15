@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Урок 4: Упаковка Оффера | Тимофей Корчагин</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600&family=Unbounded:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #0f0f11;
+            --text-main: #f0f0f0;
+            --text-muted: #888888;
+            --accent: #ccff00; 
+            --accent-dim: rgba(204, 255, 0, 0.1);
+            --danger: #ff4d4d;
+            --surface: #1a1a1c;
+            --surface-light: #252528;
+            --purple: #bf5af2;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: var(--bg); color: var(--text-main); font-family: 'Manrope', sans-serif; overflow: hidden; height: 100vh; width: 100vw; }
+
+        a { color: var(--accent); text-decoration: none; border-bottom: 1px dashed var(--accent); transition: all 0.3s; }
+        a:hover { background: var(--accent); color: var(--bg); border-bottom: none; }
+
+        .deck { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; visibility: hidden; transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); transform: scale(0.98) translateY(20px); display: flex; flex-direction: column; justify-content: center; padding: 3rem 6rem; background: var(--bg); z-index: 1; }
+        .slide.active { opacity: 1; visibility: visible; transform: scale(1) translateY(0); z-index: 10; }
+
+        h1, h2, h3 { font-family: 'Unbounded', sans-serif; text-transform: uppercase; line-height: 1.1; letter-spacing: -0.02em; }
+        h1 { font-size: 4rem; color: var(--accent); margin-bottom: 1rem; }
+        h2 { font-size: 3rem; margin-bottom: 1rem; color: #fff; }
+        h3 { font-size: 1.5rem; margin-bottom: 0.5rem; color: #fff; }
+        p { font-size: 1.3rem; line-height: 1.5; color: var(--text-muted); max-width: 1100px; margin-bottom: 1rem; }
+        
+        .highlight { color: var(--text-main); font-weight: 600; }
+        .accent-text { color: var(--accent); }
+        .danger-text { color: var(--danger); }
+        .purple-text { color: var(--purple); }
+
+        .tag { display: inline-block; background: var(--surface-light); color: #fff; padding: 0.5rem 1rem; border-radius: 4px; font-family: 'Unbounded', sans-serif; font-size: 0.8rem; margin-bottom: 1.5rem; text-transform: uppercase; }
+        
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; margin-top: 1rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 1rem; }
+        
+        .card { background: var(--surface); padding: 2rem; border-radius: 16px; border: 1px solid #333; position: relative; display: flex; flex-direction: column; }
+        .card.active { border-color: var(--accent); }
+        .card.danger { border-color: var(--danger); }
+        .card.purple { border-color: var(--purple); }
+
+        .big-number { font-size: 4rem; font-family: 'Unbounded', sans-serif; color: var(--surface); -webkit-text-stroke: 1px var(--surface-light); position: absolute; right: 2rem; bottom: 2rem; z-index: -1; opacity: 0.5; }
+
+        ul { list-style: none; }
+        li { font-size: 1.2rem; margin-bottom: 0.8rem; display: flex; align-items: start; color: var(--text-muted); }
+        li::before { content: "→"; color: var(--accent); margin-right: 0.8rem; font-family: 'Unbounded', sans-serif; flex-shrink: 0; }
+
+        .btn-copy {
+            background: var(--surface-light); border: 1px solid #555; color: #fff;
+            padding: 0.8rem 1.5rem; border-radius: 8px; cursor: pointer; font-family: 'Unbounded';
+            font-size: 1rem; margin-top: 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s;
+        }
+        .btn-copy:hover { border-color: var(--accent); color: var(--accent); transform: scale(1.02); }
+
+        /* Custom Table Style */
+        .matrix-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 1.1rem; }
+        .matrix-table th { text-align: left; color: var(--accent); font-family: 'Unbounded'; padding: 1rem; border-bottom: 1px solid #333; }
+        .matrix-table td { padding: 1rem; border-bottom: 1px solid #333; color: var(--text-muted); vertical-align: top; }
+        .matrix-table tr:last-child td { border-bottom: none; }
+        .matrix-table td strong { color: #fff; display: block; margin-bottom: 0.3rem; }
+
+        .progress-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: #222; z-index: 100; }
+        .progress { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s ease; }
+    </style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+    <!-- 1. INTRO -->
+    <section class="slide active">
+        <div class="tag">УРОК 4</div>
+        <h1>Упаковка Оффера 📦</h1>
+        <p class="highlight" style="font-size: 1.8rem; margin-top: 1rem;">Лендинг, Бот или Пост?</p>
+        <p style="margin-top: 1rem;">Как написать оффер, если не умеешь писать, и какую форму выбрать, чтобы купили.</p>
+        <div class="big-number">01</div>
+    </section>
+
+    <!-- 2. FORM MATTERS (WEIGHT LOSS EXAMPLE) -->
+    <section class="slide">
+        <div class="tag danger">ФУНДАМЕНТ</div>
+        <h2>Важна ли форма?</h2>
+        <p>Давайте разберем на примере ниши <b>«Похудение»</b>.</p>
+        
+        <div class="grid-3" style="margin-top: 2rem;">
+            <div class="card danger">
+                <h3 class="danger-text">Бот?</h3>
+                <p>«Купи бота для похудения».</p>
+                <p style="font-size: 3rem; margin-top: 1rem;">❌</p>
+                <p style="font-size: 0.9rem;">Люди не привыкли худеть через чат-ботов. Это странно.</p>
+            </div>
+            <div class="card active">
+                <h3 class="accent-text">Курс?</h3>
+                <p>«Марафон похудения».</p>
+                <p style="font-size: 3rem; margin-top: 1rem;">✅</p>
+                <p style="font-size: 0.9rem;">Покупают тысячами. Привычный формат.</p>
+            </div>
+            <div class="card active">
+                <h3 class="accent-text">Приложение?</h3>
+                <p>«Трекер калорий».</p>
+                <p style="font-size: 3rem; margin-top: 1rem;">✅</p>
+                <p style="font-size: 0.9rem;">Понятная утилита. Покупают подписку.</p>
+            </div>
+        </div>
+        <div class="big-number">02</div>
+    </section>
+
+    <!-- 3. MARKET RULE -->
+    <section class="slide">
+        <div class="tag">ПРАВИЛО РЫНКА</div>
+        <h2>Не иди против течения 🌊</h2>
+        <p class="highlight">Кто мы такие, чтобы спорить с желаниями клиента?</p>
+        
+        <div class="grid" style="margin-top: 2rem;">
+            <div class="card active">
+                <h3>Закон Формы:</h3>
+                <ul>
+                    <li>Покупают приложения? <b>Делаем приложение.</b></li>
+                    <li>Покупают курсы? <b>Упаковываем твой код как "Доступ к закрытому клубу".</b></li>
+                    <li>Покупают услугу? <b>Делаем бота, который прикидывается человеком.</b></li>
+                </ul>
+            </div>
+            <div class="card neutral" style="justify-content: center;">
+                <p style="font-size: 1.4rem; text-align: center;">То, что внутри (код) — важно.<br>Но если молоко налить в бутылку из-под машинного масла — <b>его не купят</b>.</p>
+            </div>
+        </div>
+        <div class="big-number">03</div>
+    </section>
+
+    <!-- 4. PMHS FORMULA -->
+    <section class="slide">
+        <div class="tag">КОПИРАЙТИНГ</div>
+        <h2>Как писать, не умея писать?</h2>
+        <p>Используем формулу <b>PMHS</b>. Это алгоритм для технарей.</p>
+        
+        <div class="grid" style="grid-template-columns: repeat(4, 1fr); gap: 1rem;">
+            <div class="card danger">
+                <h3 class="danger-text">P (Pain)</h3>
+                <p>Боль.<br>Ткни в рану.</p>
+            </div>
+            <div class="card danger" style="border-left: 4px solid var(--danger);">
+                <h3 class="danger-text">M (More Pain)</h3>
+                <p>Усиление.<br>Покрути ножом. Что будет, если не решить?</p>
+            </div>
+            <div class="card active">
+                <h3 class="accent-text">H (Hope)</h3>
+                <p>Надежда.<br>Есть другой, легкий путь.</p>
+            </div>
+            <div class="card active" style="border-left: 4px solid var(--accent);">
+                <h3 class="accent-text">S (Solution)</h3>
+                <p>Решение.<br>Твой продукт.</p>
+            </div>
+        </div>
+        <div class="big-number">04</div>
+    </section>
+
+    <!-- 5. PMHS EXAMPLE (TAROT) -->
+    <section class="slide">
+        <div class="tag">ПРИМЕР</div>
+        <h2>Разбор: Таро-бот 🔮</h2>
+        
+        <div class="card active" style="margin-top: 1rem;">
+            <div style="display: grid; grid-template-columns: 80px 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <strong class="danger-text">PAIN:</strong>
+                <span>Он читает сообщения, но молчит? Ты не понимаешь, что у него в голове?</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 80px 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <strong class="danger-text">MORE:</strong>
+                <span>Неизвестность убивает. Ты проверяешь телефон каждые 5 минут, накручиваешь себя и теряешь гордость.</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 80px 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <strong class="accent-text">HOPE:</strong>
+                <span>Представь, если бы ты могла прямо сейчас узнать его истинные мысли, не унижаясь вопросами.</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 80px 1fr; gap: 1rem;">
+                <strong class="accent-text">SOL:</strong>
+                <span>Анонимный Таро-расклад в Telegram. Введи имя — получи ответ карт и стратегию поведения через 30 секунд.</span>
+            </div>
+        </div>
+        <div class="big-number">05</div>
+    </section>
+
+    <!-- 6. MATRIX OF PACKAGING -->
+    <section class="slide">
+        <div class="tag">ИНСТРУМЕНТЫ</div>
+        <h2>Матрица: Куда положить текст?</h2>
+        <p>Выбираем упаковку исходя из типа продукта.</p>
+        
+        <div class="card active" style="padding: 0; overflow: hidden;">
+            <table class="matrix-table">
+                <thead>
+                    <tr>
+                        <th width="30%">Тип продукта</th>
+                        <th width="30%">Упаковка</th>
+                        <th>Почему?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Импульс / Эмоция</strong><br>(Таро, Пранки, Тесты)</td>
+                        <td><span class="tag" style="margin:0; background: var(--purple);">Stories / Post</span></td>
+                        <td>Решение принимается за секунду. Нужна яркая картинка и большая кнопка.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Утилита</strong><br>(VPN, Скачать видео)</td>
+                        <td><span class="tag" style="margin:0; background: #333;">Telegram Bot</span></td>
+                        <td>"Вот проблема — вот кнопка". Не грузи лонгридами.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Сложное / B2B</strong><br>(Парсинг, Софт)</td>
+                        <td><span class="tag" style="margin:0; background: #333;">Notion / Telegraph</span></td>
+                        <td>Нужно доверие, кейсы и объяснение "как это работает".</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Услуга</strong><br>(Резюме, Дизайн)</td>
+                        <td><span class="tag" style="margin:0; background: #00AAFF;">Авито / Kwork</span></td>
+                        <td>Там уже ищут исполнителя. Упаковка — это фото профиля.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="big-number">06</div>
+    </section>
+
+    <!-- 7. SPYING (WEB2WEB & MIRO) -->
+    <section class="slide">
+        <div class="tag">НАСМОТРЕННОСТЬ</div>
+        <h2>Воруй как художник 🕵️‍♂️</h2>
+        <p class="highlight">Не изобретай велосипед. Посмотри, как продают лидеры.</p>
+        
+        <div class="grid">
+            <div class="card active">
+                <h3>Где смотреть воронки?</h3>
+                <ul style="margin-top: 1rem;">
+                    <li><a href="https://docs.google.com/spreadsheets/d/1gguwoqz6HQgkTvLwdEZux-r8Q2_fNej_Gnj5Q3nNMI4/edit?gid=0#gid=0" target="_blank">Web2Web Funnels</a> (Таблица)</li>
+                    <li><a href="https://miro.com/app/board/uXjVKp4bamc=/" target="_blank">Miro: Логика воронок</a></li>
+                </ul>
+                <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);">Задача: Прокликать 10 конкурентов и заскринить их путь от рекламы до оплаты.</p>
+            </div>
+            <div class="card neutral">
+                <h3>На что смотреть?</h3>
+                <p>Не смотри на красоту.</p>
+                <p class="accent-text">Смотри на ЛОГИКУ:</p>
+                <ul>
+                    <li>Что спрашивают первым?</li>
+                    <li>Где обещают счастье?</li>
+                    <li>В какой момент просят деньги?</li>
+                </ul>
+            </div>
+        </div>
+        <div class="big-number">07</div>
+    </section>
+
+    <!-- 8. PAYMENTS -->
+    <section class="slide">
+        <div class="tag">ДЕНЬГИ</div>
+        <h2>Как принять оплату ЗАВТРА? 💸</h2>
+        <p>Забудь про ИП, кассы и сложные пейволы. Нам нужен быстрый тест.</p>
+        
+        <div class="grid">
+            <div class="card active">
+                <h3 class="accent-text">1. Telegram Stars ⭐️</h3>
+                <p>Нативно. Внутри бота. В 2 клика.</p>
+                <p style="font-size: 0.9rem; margin-top: 0.5rem;">Идеально для цифровых товаров (гайд, расклад, подписка). Пользователь не боится платить.</p>
+            </div>
+            <div class="card">
+                <h3>2. Донат / Ссылка</h3>
+                <p>Обычная ссылка на "Тинькофф Сбор" или карту.</p>
+                <p style="font-size: 0.9rem; margin-top: 0.5rem;">Текст: <i>"Я собираю на развитие проекта, если полезно — угостите кофе"</i>. Для MVP это нормально.</p>
+            </div>
+        </div>
+        <p class="highlight" style="margin-top: 2rem;">Главное: Кнопка оплаты должна быть СРАЗУ после блока Solution.</p>
+        <div class="big-number">08</div>
+    </section>
+
+    <!-- 9. HOMEWORK -->
+    <section class="slide">
+        <div class="tag">ДОМАШКА</div>
+        <h2>Задание на неделю</h2>
+        <div class="card active">
+            <ol style="font-size: 1.3rem; line-height: 1.6;">
+                <li><b>Spy:</b> Найти 3 конкурентов. Собрать в Figma их путь (Реклама → Упаковка → Оплата).</li>
+                <li><b>Text:</b> Написать свой оффер по формуле <b>PMHS</b>.</li>
+                <li><b>Pack:</b> Собрать это в MVP (Пост в канале, Бот или страница в Notion).</li>
+                <li><b>Link:</b> Прислать ссылку, по которой я захочу купить.</li>
+            </ol>
+        </div>
+        <div class="card neutral" style="margin-top: 1.5rem; border: none; background: transparent;">
+             <p style="text-align: center;">Не пишите код, пока не будет оффера, за который хочется отдать деньги.</p>
+        </div>
+        <div class="big-number">HW</div>
+    </section>
+
+    <!-- 10. FINAL -->
+    <section class="slide">
+        <div class="tag">ФИНАЛ</div>
+        <h2>Упаковка — это обещание</h2>
+        <p class="highlight" style="font-size: 2rem;">Код нужен, чтобы выполнить обещание.<br>Но продает именно обещание.</p>
+        <div class="big-number">END</div>
+    </section>
+
+</div>
+
+<div class="progress-container"><div class="progress" id="progress"></div></div>
+
+<script>
+    const slides = document.querySelectorAll('.slide');
+    const progress = document.getElementById('progress');
+    let currentSlide = 0;
+
+    function updateURL(index) {
+        const url = new URL(window.location);
+        url.searchParams.set('slide', index);
+        window.history.pushState({}, '', url);
+    }
+
+    function showSlide(index) {
+        if (index < 0 || index >= slides.length) return;
+        slides.forEach(s => s.classList.remove('active'));
+        slides[index].classList.add('active');
+        currentSlide = index;
+        progress.style.width = `${((index + 1) / slides.length) * 100}%`;
+        updateURL(index);
+    }
+
+    window.addEventListener('load', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const slideParam = parseInt(urlParams.get('slide'));
+        showSlide(isNaN(slideParam) ? 0 : slideParam);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') showSlide(currentSlide + 1);
+        if (e.key === 'ArrowLeft') showSlide(currentSlide - 1);
+    });
+</script>
+
+</body>
+</html>

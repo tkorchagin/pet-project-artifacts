@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Guide - Timofey Korchagin</title>
+    <style>
+        /* FONTS */
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Unbounded:wght@400;600;900&display=swap');
+
+        :root {
+            --bg: #000000;
+            --text: #ffffff;
+            --accent: #ccff00; /* Acid Green */
+            --accent-dim: rgba(204, 255, 0, 0.1);
+            --gray: #222;
+            --border: #333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Unbounded', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* UTILS */
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .green { color: var(--accent); }
+        .uppercase { text-transform: uppercase; }
+        .dim { color: #888; }
+        
+        /* SLIDER LAYOUT */
+        .slides-wrapper {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            overflow-x: hidden;
+            scroll-behavior: auto; /* INSTANT JUMPS */
+        }
+
+        section {
+            min-width: 100vw;
+            height: 100vh;
+            padding: 4rem 6rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-right: 1px solid var(--border);
+            position: relative;
+        }
+
+        /* TYPOGRAPHY */
+        h1 {
+            font-size: 4rem;
+            line-height: 1.1;
+            font-weight: 900;
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            color: var(--accent);
+            line-height: 1.1;
+        }
+
+        p, li {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.4rem;
+            line-height: 1.5;
+            color: #fff;
+            max-width: 1100px;
+        }
+
+        /* LISTS */
+        ol {
+            list-style: none;
+            counter-reset: item;
+        }
+        ol li {
+            position: relative;
+            padding-left: 3.5rem;
+            margin-bottom: 1.5rem;
+        }
+        ol li::before {
+            content: counter(item) ".";
+            counter-increment: item;
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+            font-size: 1.4rem;
+        }
+
+        ul {
+            list-style: none;
+        }
+        ul li {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+            position: relative;
+        }
+        ul li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        /* LINKS & BUTTONS */
+        a.tool-link {
+            display: inline-block;
+            text-decoration: none;
+            background: #222;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono';
+            font-size: 1rem;
+            color: #fff;
+            border: 1px solid #444;
+            transition: 0.2s;
+            margin-right: 1rem;
+        }
+        a.tool-link:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(204, 255, 0, 0.05);
+        }
+
+        /* CODE BOX */
+        .prompt-box {
+            background: #111;
+            border: 1px solid var(--border);
+            border-left: 6px solid var(--accent);
+            margin-top: 2rem;
+            max-width: 1200px;
+            width: 100%;
+        }
+        .prompt-header {
+            padding: 0.8rem 1.5rem;
+            background: #1a1a1a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        .prompt-content {
+            padding: 1.5rem;
+            max-height: 35vh;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono';
+            font-size: 1.1rem;
+            color: #e0e0e0;
+            white-space: pre-wrap;
+        }
+        .btn-copy {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-family: 'JetBrains Mono';
+            font-weight: bold;
+            text-transform: uppercase;
+            min-width: 120px;
+            text-align: center;
+        }
+        .btn-copy:hover {
+            background: var(--accent);
+            color: #000;
+        }
+
+        /* COMPARISON GRID */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        .comp-box {
+            padding: 2rem;
+            border: 1px solid var(--border);
+        }
+        .comp-box.bad {
+            border-color: #333;
+            color: #888;
+        }
+        .comp-box.good {
+            border-color: var(--accent);
+            background: rgba(204, 255, 0, 0.03);
+        }
+
+        /* NAV HINT */
+        .slide-num {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            font-family: 'JetBrains Mono';
+            color: #333;
+            font-size: 2rem;
+        }
+        
+        .nav-hint {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            font-family: 'JetBrains Mono';
+            font-size: 1rem;
+            color: #666;
+            padding: 0.5rem 1rem;
+            border: 1px solid #333;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="nav-hint">Навигация: ⬅️ ➡️</div>
+
+    <div class="slides-wrapper" id="wrapper">
+
+        <!-- 0. COVER WITH PHOTO -->
+        <section style="padding: 0; flex-direction: row;">
+            <div class="slide-num" style="position: absolute; z-index: 10;">01</div>
+
+            <div style="width: 55%; padding: 50px; display: flex; flex-direction: column; justify-content: center; z-index: 2;">
+                <h1 style="font-size: 62px; line-height: 1.1; margin-top:40px; font-weight: 800;">
+                    КАК ИСПОЛЬЗОВАТЬ <span class="green">СЕТОЧКИ</span>,<br>ЧТОБЫ РЕШИТЬ <span class="green">ЛЮБУЮ ЗАДАЧУ</span>
+                </h1>
+
+                <div style="margin-top: auto; border-top: 2px solid #333; padding-top: 20px;">
+                    <div style="font-size: 32px; font-weight: 700; margin-bottom: 5px; text-transform: uppercase;">
+                        ТИМОФЕЙ КОРЧАГИН
+                    </div>
+                    <div class="mono green" style="font-size: 24px; font-weight: bold;">
+                        @tkorchagin
+                    </div>
+                    <div class="mono dim" style="font-size: 16px; margin-top: 10px;">
+                        КОНФЕРЕНЦИЯ «МАТЕМАТИКА ДОБРА»
+                    </div>
+                </div>
+            </div>
+
+            <div style="width: 45%; height: 100%; position: relative; background: #111; border-left: 1px solid var(--border); display: flex; align-items: center; justify-content: center;">
+                <img src="photo2.jpeg" alt="Тимофей Корчагин" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+        </section>
+
+        <!-- 1. TITLE -->
+        <!-- <section>
+            <div class="slide-num">01</div>
+            <h1>КАК ИСПОЛЬЗОВАТЬ СЕТОЧКИ,<br>ЧТОБЫ РЕШИТЬ <span class="green">ЛЮБУЮ ЗАДАЧУ</span></h1>
+            <p class="mono green uppercase" style="font-size: 1.8rem; margin-top: 1rem;">100 проц, изи гайд</p>
+
+            <div style="margin-top: 5rem;" class="mono">
+                <span class="dim">Спикер:</span><br>
+                <span style="font-size: 1.5rem;">ТИМОФЕЙ КОРЧАГИН | @tkorchagin</span>
+            </div>
+        </section> -->
+
+        <!-- 2. AGENDA -->
+        <section>
+            <div class="slide-num">02</div>
+            <h2>ПЛАН НА СЕГОДНЯ</h2>
+            <ol style="font-size: 1.8rem; margin-top: 2rem;">
+                <li><strong>ФИЛОСОФИЯ:</strong> Почему нейросети выдают воду и как это исправить.</li>
+                <li><strong>ДЕНЬГИ:</strong> Как подготовиться к разговору о повышении.</li>
+                <li><strong>КАРЬЕРА:</strong> Как хакнуть резюме под вакансию мечты.</li>
+                <li><strong>ВАЙБ КОДИНГ:</strong> Как сделать своего бота, не написав ни строчки кода.</li>
+            </ol>
+        </section>
+
+        <!-- 3. BIO -->
+        <section>
+            <div class="slide-num">03</div>
+            <h2>КТО ТАКОЙ ТИМОФЕЙ КОРЧАГИН</h2>
+            <p style="margin-bottom: 3rem; color: var(--accent);">Суперсила: Мгновенно доходить от идеи до первых денег.</p>
+            
+            <ul style="font-size: 1.5rem; line-height: 2;">
+                <li>Сооснователь студии разработки (Сбер, Tele2, ЦУМ, Билайн).</li>
+                <li>Организатор первого в мире хакатона по ChatGPT.</li>
+                <li>Создатель ИИ-психолога «Дневничок» и игры «Планетки».</li>
+                <li>Консультирую по AI.</li>
+                <li>Люблю странный UX.</li>
+                <li>Кайфу быть молодым батей.</li>
+            </ul>
+            
+            <div style="margin-top: 3rem;" class="mono dim">
+                Личка в Telegram: @tkorchagin
+            </div>
+        </section>
+
+        <!-- 4. PROBLEM -->
+        <section>
+            <div class="slide-num">04</div>
+            <h2>ГЛАВНАЯ ПРОБЛЕМА</h2>
+            <p>Нейросети знают всё, но по умолчанию они — "средний человек".</p>
+            
+            <div class="comparison-grid">
+                <div class="comp-box bad">
+                    <h3 class="mono uppercase" style="margin-bottom: 1rem; color: #888;">Обычный друг</h3>
+                    <p style="font-size: 1.2rem; color: #aaa;">
+                        — Как тебе моя идея?<br>
+                        — Ну... прикольно. Ты молодец.
+                        <br><br>
+                        <em>(Боится обидеть, льет воду)</em>
+                    </p>
+                </div>
+                <div class="comp-box good">
+                    <h3 class="mono uppercase" style="margin-bottom: 1rem; color: var(--accent);">Друг-продюсер</h3>
+                    <p style="font-size: 1.2rem;">
+                        — Как тебе идея?<br>
+                        — Есть потенциал! Сейчас вот что сделай: 1) вот так переформулируй, 2) добавь вот это, 3) покажи вот кому.
+                        <br><br>
+                        <em>(Дает четкий план действий и верит в успех)</em>
+                    </p>
+                </div>
+            </div>
+            
+            <p style="margin-top: 2rem; font-weight: bold;" class="green text-center">
+                ВЫВОД: Нет роли = Вода.
+            </p>
+        </section>
+
+        <!-- 5. TRANSITION -->
+        <section>
+            <div class="slide-num">05</div>
+            <h1 style="font-size: 3.5rem;">ДАВАЙТЕ ЗАТЕСТИМ</h1>
+            <p>Например, найдем способ, как вам <span class="green">ПОВЫСИТЬ ОКЛАД</span> на текущем месте.</p>
+        </section>
+
+        <!-- 6. CASE 1: RESEARCH -->
+        <section>
+            <div class="slide-num">06</div>
+            <div class="mono green">КЕЙС: ПОВЫШЕНИЕ</div>
+            <h2>ШАГ 1: ИЩЕМ ФАКТУРУ</h2>
+            <p>Не выдумывайте промпт сами. Пусть нейросеть найдет лучшие мировые практики.</p>
+            
+            <div style="margin: 2rem 0;">
+                <a href="https://chatgpt.com" target="_blank" class="tool-link">ChatGPT ↗</a>
+                <a href="https://claude.ai" target="_blank" class="tool-link">Claude ↗</a>
+                <a href="https://www.perplexity.ai" target="_blank" class="tool-link">Perplexity ↗</a>
+            </div>
+
+            <div class="prompt-box">
+                <div class="prompt-header">
+                    <span class="mono">ПРОМПТ №1 (Research)</span>
+                    <button class="btn-copy" onclick="copyText(this, 'p1')">КОПИРОВАТЬ</button>
+                </div>
+                <div class="prompt-content" id="p1">Найди в интернете всю информацию и лучшие практики о том как говорить с руководителями о повышении, что стоит подготовить ко встрече, как лучше всего говорить о росте дохода и новых задачах в 2026 году.
+
+Почитай реддит, форумы, гласдор и другие информационные ресурсы про рекрутинг и найди сам топовые ресурсы с лучшими практиками. Уточни как будет меняться разговор в зависимости от типа работы.
+
+Найди все хаки как получить повышение оклада, белые и черные механики. Собери все в огромную детальную инструкцию в формате маркдаун, чтобы я получил исчерпывающий гайд. Сохрани ссылки на источники и вставляй их сразу в тексте.</div>
+            </div>
+        </section>
+
+        <!-- 7. CASE 1: META-PROMPT -->
+        <section>
+            <div class="slide-num">07</div>
+            <div class="mono green">КЕЙС: ПОВЫШЕНИЕ</div>
+            <h2>ШАГ 2: СОЗДАЕМ ИНСТРУКЦИЮ</h2>
+            <p>Теперь просим сеточку превратить найденные знания в Инструкцию для Агента.</p>
+            
+            <div class="prompt-box">
+                <div class="prompt-header">
+                    <span class="mono">ПРОМПТ №2 (Пишем в тот же чат!)</span>
+                    <button class="btn-copy" onclick="copyText(this, 'p2')">КОПИРОВАТЬ</button>
+                </div>
+                <div class="prompt-content" id="p2">Зная все что ты описал выше, собери ультрадетализированный промпт на английском, для агента с которым я буду обсуждать способы повышения на работе и роста оклада.
+
+Мне нужно, чтобы я сгрузил в него всю фактуру по своей ситуации, чтобы агент если нужно задал мне уточняющие вопросы, погуглил дополнительно мою сферу и работодателей и другую инфу и выдал мне детализированный пошаговый план действий и еще я с ним мог посоветоваться как конкретно говорить с руководителем и как психологически и по фактуре подготовиться ко встрече.</div>
+            </div>
+        </section>
+
+        <!-- 8. CASE 1: ACTION -->
+        <section>
+            <div class="slide-num">08</div>
+            <div class="mono green">КЕЙС: ПОВЫШЕНИЕ</div>
+            <h2>ШАГ 3: ТРЕНИРОВКА</h2>
+            <p style="margin-bottom: 2rem;">У нас есть гигантский промпт от нейросети. Что делать?</p>
+
+            <ol style="font-size: 1.5rem;">
+                <li>Открываем <strong>новый чистый чат</strong> (New Chat).</li>
+                <li>Вставляем тот огромный промпт, который мы получили на Шаге 2.</li>
+                <li>Нейросеть войдет в роль Коуча.</li>
+                <li>Пишем ей свою ситуацию: <em>"Я работаю 2 года, хочу +30%, начальник строгий..."</em></li>
+                <li><strong class="green">PROFIT:</strong> Получаем сценарий переговоров под себя.</li>
+            </ol>
+        </section>
+
+        <!-- 9. CASE 2: CV HACKING -->
+        <section>
+            <div class="slide-num">09</div>
+            <div class="mono green">ДОМАШКА</div>
+            <h2>ХАКАЕМ РЕЗЮМЕ (CV)</h2>
+            <p>Суть та же: сначала поговорили с боссом, если не вышло — ищем оффер круче.</p>
+            
+            <div style="margin-top: 3rem; border: 1px solid #333; padding: 2rem; background: #0a0a0a;">
+                <h3 class="mono green" style="margin-bottom: 1.5rem;">АЛГОРИТМ:</h3>
+                <ol>
+                    <li>Используем метод из кейса 1: просим сначала найти лучшие практики CV, потом написать <strong>"Промпт Редактора CV"</strong>.</li>
+                    <li>Открываем новый чат, вставляем промпт Редактора.</li>
+                    <li>Копируем туда текст <strong>ВАКАНСИИ МЕЧТЫ</strong>.</li>
+                    <li>Копируем туда текст <strong>МОЕГО РЕЗЮМЕ</strong>.</li>
+                    <li>Просим: <em>"Сравни. Найди как улучшить. Перепиши мое резюме так, чтобы оно идеально подходило под эту вакансию."</em></li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- 10. LOVABLE INTRO -->
+        <section>
+            <div class="slide-num">10</div>
+            <div class="mono green">ВАЙБ КОДИНГ</div>
+            <h2>LOVABLE.DEV</h2>
+            <p>Это сайт, куда можно написать идею текстом, и он сделает работающее приложение.</p>
+
+            <div class="comparison-grid" style="margin-top: 3rem;">
+                <div class="comp-box bad">
+                    <h3 class="mono uppercase" style="margin-bottom: 1rem; color: #888;">БЕЗ AI</h3>
+                    <p style="font-size: 1.2rem; color: #aaa;">
+                        2-4 недели разработки<br>
+                        Нужен программист<br>
+                        $2000-5000
+                    </p>
+                </div>
+                <div class="comp-box good">
+                    <h3 class="mono uppercase" style="margin-bottom: 1rem; color: var(--accent);">С LOVABLE</h3>
+                    <p style="font-size: 1.2rem;">
+                        30 минут<br>
+                        Только ты и идея<br>
+                        $0-25
+                    </p>
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem; padding: 1.5rem; background: #0a0a0a; border: 1px solid #333;">
+                <p class="mono" style="margin-bottom: 1rem;">ПРИМЕР ЗАПРОСА:</p>
+                <p style="font-size: 1.1rem; color: var(--accent);">
+                    "Сделай бота, который принимает точку геолокации и отвечает какая там сейчас погода на весь день"
+                </p>
+            </div>
+
+            <p style="margin-top: 2rem; font-size: 1.2rem;">
+                <strong class="green">Магия:</strong> Lovable сам прикрутит погодное API и, если надо, добавит ИИ для обработки данных.
+            </p>
+
+        </section>
+
+        <!-- 11. SPECS CHECKLIST -->
+        <section>
+            <div class="slide-num">11</div>
+            <div class="mono green">ЧЕК-ЛИСТ</div>
+            <h2>КАК ПИСАТЬ ЗАДАНИЕ СЕТОЧКЕ</h2>
+            <p>Чтобы Lovable сделал красиво с первого раза, пишите по структуре:</p>
+            
+            <ol style="margin-top: 2rem; font-size: 1.3rem;">
+                <li><strong>ВХОДНЫЕ ДАННЫЕ:</strong> Что юзер делает? (Нажимает /start, пишет текст).</li>
+                <li><strong>ЛОГИКА:</strong> Если пользователь нажал start → пришли приветственное сообщение. Если прислал картинку → сохрани ее.</li>
+                <li><strong>РЕЗУЛЬТАТ:</strong> Что показать в итоге? (Каждый раз отвечай случайным анекдотом).</li>
+                <li><strong>АНАЛИТИКА:</strong> Что мы хотим знать? (Считай уникальных юзеров).</li>
+                <li><strong>ДИЗАЙН:</strong> Опиши стиль. "Фиолетовый на оранжевом, крупный шрифт".</li>
+            </ol>
+        </section>
+
+        <!-- 12. DEMO BOT -->
+        <section>
+            <div class="slide-num">12</div>
+            <div class="mono green">LIVE DEMO</div>
+            <h2>УМНЫЙ TELEGRAM БОТ</h2>
+            <p>Я покажу, как за 5 минут сделать бота, который отвечает "умно" (через нейросеть), а не просто по шаблону.</p>
+            <br>
+            <ul style="font-size: 1.5rem;">
+                <li>Соберем интерфейс бота.</li>
+                <li>Сделаем админку для управления.</li>
+                <li>Покажу, где менять настройки "личности" бота.</li>
+            </ul>
+        </section>
+
+        <!-- 13. OUTRO -->
+        <section>
+            <div class="slide-num">13</div>
+            <h1 class="green">СПАСИБО</h1>
+            
+            <h2 style="font-size: 2.5rem; margin-bottom: 3rem;">Тимофей Корчагин</h2>
+
+            <div style="margin-bottom: 3rem;">
+                <p class="mono uppercase" style="color: #666; font-size: 1rem;">МЫ СЕГОДНЯ ПРОШЛИ:</p>
+                <ul style="color: #fff; margin-top: 1rem;">
+                    <li>Как искать информацию (Research).</li>
+                    <li>Как делать Промпты для Агентов.</li>
+                    <li>Как говорить о повышении.</li>
+                    <li>Как писать ТЗ для программ.</li>
+                </ul>
+            </div>
+            
+            <div style="border: 2px solid var(--accent); display: inline-block; padding: 2rem; background: #000;">
+                <p class="mono" style="font-size: 2.5rem; color: #fff; margin:0;">@tkorchagin</p>
+                <p class="mono" style="font-size: 1rem; margin-top: 0.5rem; color: #888;">Моя личка в Telegram</p>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        const wrapper = document.getElementById('wrapper');
+        let width = window.innerWidth;
+        
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            width = window.innerWidth;
+            goToSlide(currentSlide);
+        });
+
+        // COPY LOGIC
+        function copyText(btn, id) {
+            const text = document.getElementById(id).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = "СКОПИРОВАНО!";
+                btn.style.background = "#ccff00";
+                btn.style.color = "#000";
+                
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.background = "transparent";
+                    btn.style.color = "#ccff00";
+                }, 2000);
+            });
+        }
+
+        // SLIDE NAVIGATION LOGIC
+        let currentSlide = 1;
+        const totalSlides = document.querySelectorAll('section').length;
+
+        function goToSlide(slideNum) {
+            // Bounds check
+            if (slideNum < 1) slideNum = 1;
+            if (slideNum > totalSlides) slideNum = totalSlides;
+            
+            currentSlide = slideNum;
+            wrapper.scrollLeft = (slideNum - 1) * width;
+            
+            // Update URL parameters without reloading page
+            const url = new URL(window.location);
+            url.searchParams.set('slide', slideNum);
+            window.history.replaceState({}, '', url);
+        }
+
+        // Load slide from URL on startup
+        const params = new URLSearchParams(window.location.search);
+        const startSlide = parseInt(params.get('slide')) || 1;
+        
+        // Small timeout to ensure rendering is complete before jumping
+        setTimeout(() => {
+            goToSlide(startSlide);
+        }, 10);
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                goToSlide(currentSlide + 1);
+            }
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                goToSlide(currentSlide - 1);
+            }
+        });
+    </script>
+</body>
+</html>

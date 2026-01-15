@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>От идеи до кэша за 8 суббот | Вебинар</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600&family=Unbounded:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #0f0f11;
+            --text-main: #f0f0f0;
+            --text-muted: #888888;
+            --accent: #ccff00; 
+            --accent-dim: rgba(204, 255, 0, 0.1);
+            --danger: #ff4d4d;
+            --danger-dim: rgba(255, 77, 77, 0.1);
+            --surface: #1a1a1c;
+            --surface-light: #252528;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: var(--bg); color: var(--text-main); font-family: 'Manrope', sans-serif; overflow: hidden; height: 100vh; width: 100vw; }
+
+        .deck { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; visibility: hidden; transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); transform: scale(0.98) translateY(20px); display: flex; flex-direction: column; justify-content: center; padding: 4rem 8rem; background: var(--bg); z-index: 1; }
+        .slide.active { opacity: 1; visibility: visible; transform: scale(1) translateY(0); z-index: 10; }
+
+        h1, h2, h3 { font-family: 'Unbounded', sans-serif; text-transform: uppercase; line-height: 1.1; letter-spacing: -0.02em; }
+        h1 { font-size: 4.5rem; color: var(--accent); margin-bottom: 1.5rem; }
+        h2 { font-size: 3.5rem; margin-bottom: 1rem; color: #fff; }
+        h3 { font-size: 1.6rem; margin-bottom: 1rem; color: #fff; }
+        p { font-size: 1.6rem; line-height: 1.5; color: var(--text-muted); max-width: 1100px; margin-bottom: 1rem; }
+        
+        .highlight { color: var(--text-main); font-weight: 600; }
+        .accent-text { color: var(--accent); }
+        .danger-text { color: var(--danger); }
+
+        .tag { display: inline-block; background: var(--surface-light); color: #fff; padding: 0.5rem 1rem; border-radius: 4px; font-family: 'Unbounded', sans-serif; font-size: 0.8rem; margin-bottom: 2rem; text-transform: uppercase; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2.5rem; margin-top: 1.5rem; }
+        
+        .card { background: var(--surface); padding: 2.5rem; border-radius: 20px; border: 1px solid #333; position: relative; }
+        .card.active { border-color: var(--accent); }
+        .card.neutral { border-color: #444; opacity: 0.8; }
+        .card.danger { border-left: 4px solid var(--danger); }
+
+        .big-number { font-size: 6rem; font-family: 'Unbounded', sans-serif; color: var(--surface); -webkit-text-stroke: 2px var(--surface-light); position: absolute; right: 4rem; bottom: 3rem; z-index: -1; opacity: 0.3; }
+
+        ul { list-style: none; }
+        li { font-size: 1.6rem; margin-bottom: 1.2rem; display: flex; align-items: start; color: var(--text-muted); }
+        li::before { content: "→"; color: var(--accent); margin-right: 1.2rem; font-family: 'Unbounded', sans-serif; flex-shrink: 0; }
+        .danger-list li::before { content: "×"; color: var(--danger); }
+
+        .icon-item { text-align: center; background: var(--surface); padding: 1rem; border-radius: 20px; border: 1px solid #333; }
+        .icon-item span { font-size: 3rem; display: block; margin-bottom: 1rem; }
+
+        .progress-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: #222; z-index: 100; }
+        .progress { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s ease; }
+        
+        #timer { font-family: 'Unbounded', monospace; font-size: 6rem; color: var(--danger); margin-top: 1rem; }
+        .meme-img { max-width: 500px; border-radius: 20px; border: 2px solid var(--accent); margin-top: 1rem; }
+        .quote { font-size: 2.2rem; line-height: 1.3; color: var(--text-main); margin: 2rem 0; border-left: 4px solid var(--accent); padding-left: 2rem; }
+    </style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+    <!-- 0. INTRO -->
+    <section class="slide active">
+        <div class="tag">ВЕБИНАР</div>
+        <h1>От идеи до кэша<br>за 8 суббот</h1>
+        <p class="highlight" style="font-size: 2rem; margin-bottom: 0.5rem;">Как запускать пет-проекты в 2026 году.</p>
+        <p style="margin-bottom: 3rem;">В комьюнити. С использованием AI. Без выгорания.</p>
+        
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #333; display: flex; align-items: center; gap: 2rem;">
+            <div>
+                <p class="highlight" style="margin-bottom: 0; font-family: 'Unbounded', sans-serif; font-size: 1.1rem; text-transform: uppercase;">Тимофей Корчагин</p>
+                <p style="margin-bottom: 0; color: var(--accent); font-family: 'Unbounded', sans-serif; font-size: 0.9rem;">@tkorchagin</p>
+            </div>
+            <div style="margin-left: auto; text-align: right;">
+                <p style="font-size: 0.8rem; letter-spacing: 0.2em; color: var(--text-muted); text-transform: uppercase;">Limited Edition<br>2026 / Launch</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. MAX BENEFIT (New) -->
+    <section class="slide">
+        <div class="tag">СОВЕТ</div>
+        <h2>Как получить максимум?</h2>
+        <div class="grid" style="grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
+            <div class="icon-item"><span>👀</span><p>Фокус</p></div>
+            <div class="icon-item"><span>📝</span><p>Блокнот и ручка</p></div>
+            <div class="icon-item"><span>🌐</span><p>VPN</p></div>
+            <div class="icon-item"><span>☕</span><p>Чаёк</p></div>
+        </div>
+        <div class="card active" style="margin-top: 1rem;">
+            <p class="highlight">🎁 В середине эфира я дам кодовые слова. Те, кто напишет их первым, получат личные бонусы.</p>
+        </div>
+        <div class="big-number">01</div>
+    </section>
+
+    <!-- 1. ORG MOMENTS (New) -->
+    <section class="slide">
+        <div class="tag">Орг. моменты</div>
+        <h2>Проверка связи</h2>
+        <div class="grid">
+            <div class="card active">
+                <h3>Напишите в чат:</h3>
+                <p><span class="accent-text">1</span> — если хорошо видно и слышно</p>
+                <p><span class="accent-text">2</span> — если видно, но плохой звук</p>
+                <p><span class="accent-text">3</span> — если картинка и звук плохие</p>
+            </div>
+            <div class="card">
+                <p>📌 <b>Это эфир</b>, а не запись</p>
+                <p>⏳ Длительность: <b>1 час</b></p>
+                <p>🚫 За негатив и маты в чате — <b>бан</b></p>
+            </div>
+        </div>
+        <div class="big-number">02</div>
+    </section>
+
+    <!-- 5. AGENDA (Original) -->
+    <section class="slide">
+        <div class="tag">ПЛАН ВСТРЕЧИ</div>
+        <h2>О чем сегодня</h2>
+        <ul>
+            <li>Про мой путь, провалы и успехи</li>
+            <li>Практика: запускаем за 180 сек</li>
+            <li>Методология: Боль → Продажа → AI</li>
+            <li>Про комьюнити</li>
+        </ul>
+        <div class="big-number">03</div>
+    </section>
+
+    <!-- 9. FILTER (Original) -->
+    <section class="slide">
+        <div class="tag danger">ФИЛЬТР</div>
+        <h2 class="danger-text">Кому лучше выйти сейчас</h2>
+        <p>Пет-проекты — это не халява. Это труд.</p>
+        <div class="card danger">
+            <ul class="danger-list">
+                <li>Если ищешь «пассивный доход без усилий»</li>
+                <li>Если не хочешь притрагиваться к маркетингу</li>
+                <li>Если считаешь, код продаст себя сам</li>
+            </ul>
+        </div>
+        <div class="big-number">04</div>
+    </section>
+
+    <!-- 6. SPEAKER (Updated) -->
+    <section class="slide">
+        <div class="tag">СПИКЕР</div>
+        <h2 style="font-size: 3.2rem; margin-bottom: 0.5rem;">Я — Тимофей</h2>
+        <p class="highlight" style="font-size: 1.4rem; margin-bottom: 1.5rem;">
+            Предприниматель, кодер, муж, отец и просто красавчик.
+        </p>
+        
+        <div class="grid" style="grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+            <div class="card active" style="padding: 1.5rem;">
+                <h3 style="font-size: 1.3rem;">🚀 Скорость</h3>
+                <p style="font-size: 1.1rem;">Запустил <b>с десяток пет-проектов</b>. В свободное от работы и дочки время. Вечерами.</p>
+            </div>
+            <div class="card" style="padding: 1.5rem;">
+                <h3 style="font-size: 1.3rem;">💰 Профит</h3>
+                <p style="font-size: 1.1rem;">Сотни тысяч чистой прибыли в месяц с простых штук, собранных «на коленке».</p>
+            </div>
+            <div class="card" style="padding: 1.5rem;">
+                <h3 style="font-size: 1.3rem;">🏢 База</h3>
+                <p style="font-size: 1.1rem;">Сооснователь студии. С 2014 года запустили 100+ Enterprise-аппок для крупного бизнеса.</p>
+            </div>
+        </div>
+
+        <div class="card active" style="margin-top: 1.5rem; padding: 1.5rem; background: var(--surface-light); border-left: 4px solid var(--accent);">
+            <p style="font-size: 1.3rem; color: #fff;">
+                Я знаю, как выцеплять идеи, которые <b>залетают</b>. Мой метод — это не про удачу, а про систему из сотен попыток и умение быстро превращать код в деньги.
+            </p>
+        </div>
+        
+        <div class="big-number" style="bottom: 1rem; right: 2rem;">145+</div>
+    </section>
+
+    <!-- 3. PERSONAL ROAST (New) -->
+    <section class="slide">
+        <div class="tag">БОНУС</div>
+        <h2>Личный разбор идеи</h2>
+        <p>Я выберу <span class="accent-text">5 человек</span> из чата, с которыми мы сделаем детальную «Прожарку» идеи.</p>
+        <div class="card active" style="margin-top: 2rem;">
+            <h3>Что нужно сделать?</h3>
+            <p>Просто напиши мне в личку <span class="highlight">@tkorchagin</span> слово:</p>
+            <h2 class="accent-text" style="font-size: 4rem; margin: 1rem 0;">РАЗБОР</h2>
+            <p>Договоримся о времени в переписке.</p>
+        </div>
+        <div class="big-number">06</div>
+    </section>
+
+    <!-- 4. WHY NOT LAUNCHED? (New) -->
+    <section class="slide">
+        <div class="tag">REALITY CHECK</div>
+        <h2>Почему ты еще не запустился?</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>❌ Нет знаний / идеи</h3>
+                <p>Думаешь, что нужно быть тех-директором, чтобы собрать MVP. В 2026 году это делает AI.</p>
+            </div>
+            <div class="card">
+                <h3>❌ Нет времени</h3>
+                <p>Пытаешься делать всё сразу. Мы учим работать по системе "8 суббот".</p>
+            </div>
+        </div>
+        <p class="highlight" style="margin-top: 2rem;">Большинство просто боится начать без наставника. Сегодня мы это исправим.</p>
+        <div class="big-number">07</div>
+    </section>
+
+    <!-- 7. CAREER CONTEXT (Original) -->
+    <section class="slide">
+        <div class="tag neutral">КОНТЕКСТ</div>
+        <h2>Пет проект — хак карьеры</h2>
+        <div class="grid">
+            <div class="card neutral">
+                <h3>📉 Ждать (Найм)</h3>
+                <p>Безопасно получаешь свои 4-10к$. Растешь, если растет компания. Но сейчас компании сушат косты.</p>
+            </div>
+            <div class="card active">
+                <h3>🟢 Создавать (Своё)</h3>
+                <p>100% ответственность. Это актив, который дает независимость или рост x2 по рынку.</p>
+            </div>
+        </div>
+        <div class="big-number">08</div>
+    </section>
+
+    <!-- 8. MARKET SHIFT (Original) -->
+    <section class="slide">
+        <div class="tag">ТРЕНД 2026</div>
+        <h2>Время создателей</h2>
+        <div class="quote">
+            «ИИ напишет 90% кода в ближайшие 5 лет. Порог входа обнулился».
+        </div>
+        <p class="highlight">Побеждает тот, у кого есть <span class="accent-text">Идея и Скорость</span>. Утром идея — вечером рабочий прототип.</p>
+        <div class="big-number">09</div>
+    </section>
+
+    <!-- 10. PROJECTS INTRO (Original) -->
+    <section class="slide">
+        <div class="tag">ПРАКТИКА</div>
+        <h2>Мои кейсы</h2>
+        <p>Я ищу боль и продаю решение.</p>
+        <p class="highlight">Давайте разберем на конкретных примерах.</p>
+        <div class="big-number">10</div>
+    </section>
+
+    <!-- 11. CASE 1 (Original) -->
+    <section class="slide">
+        <div class="tag">КЕЙС №1</div>
+        <h2>AI-Психолог "Дневничок"</h2>
+        <div class="grid">
+            <div class="card">
+                <p><span class="accent-text">БОЛЬ:</span> Подруге нужно выговориться, а в ответ только "угу". Психолог — это дорого.</p>
+                <p><span class="accent-text">MVP:</span> 50 минут на сборку в TG.</p>
+            </div>
+            <div class="card active">
+                <p><span class="accent-text">ИТОГ:</span> 30 оплат ДО написания бэкенда.</p>
+            </div>
+        </div>
+        <div class="big-number">11</div>
+    </section>
+
+    <!-- 12. CASE 2 (Planets) -->
+    <section class="slide">
+        <div class="tag">КЕЙС №2</div>
+        <h2>Игра "Планетки"</h2>
+        <p class="highlight">Продажи на автопилоте</p>
+        <div class="grid">
+            <div class="card">
+                <p><span class="accent-text">НАБЛЮДЕНИЕ:</span> Жена залипает в простые «шарики». Люди любят залипать.</p>
+                <p><span class="accent-text">ТЕСТ:</span> Собрал бота за вечер, прикрутил платежку.</p>
+            </div>
+            <div class="card active">
+                <p><span class="accent-text">РЕЗУЛЬТАТ:</span> Дикая аддиктивность. Приносит доход на полном пассиве.</p>
+            </div>
+        </div>
+        <div class="big-number">12</div>
+    </section>
+
+    <!-- 14. MEAT SLIDE (New) -->
+    <section class="slide" style="align-items: center; text-align: center;">
+        <div class="tag">LIVE</div>
+        <h2>Начинается самое мясо!</h2>
+        <p class="highlight">Сейчас будем смотреть, как идеи превращаются в код за минуты.</p>
+        <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNGJueXp4bmZ6eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/QMHoU66DlEhhK/giphy.gif" class="meme-img" alt="This is fine">
+        <h2 style="margin-top: 1.5rem;">ДАЙТЕ ОГОНЬКОВ В ЧАТ 🔥🔥🔥</h2>
+        <div class="big-number">13</div>
+    </section>
+
+    <!-- 15. DEMO (Original) -->
+    <section class="slide">
+        <div class="tag">ИНСТРУМЕНТ</div>
+        <h2>LIVE DEMO: Запуск за 180 секунд</h2>
+        <p style="margin-bottom: 2rem;">Забудьте про "нанять команду". Вбиваете идею — получаете прототип.</p>
+        <div class="card active" style="text-align: center;">
+            <h3 class="accent-text">Демонстрация экрана</h3>
+        </div>
+        <div class="big-number">14</div>
+    </section>
+
+    <!-- 13. METHODOLOGY (Original) -->
+    <section class="slide">
+        <div class="tag">МЕТОДОЛОГИЯ</div>
+        <h2>В чем суть метода?</h2>
+        <div class="grid">
+            <div class="card neutral">
+                <h3>❌ Старый путь</h3>
+                <p>Идея → Месяц разработки → Релиз → Тишина.</p>
+            </div>
+            <div class="card active">
+                <h3>✅ Наш путь</h3>
+                <p>Боль → <span class="accent-text">ПРОДАЖА</span> → Сборка с AI за вечер.</p>
+            </div>
+        </div>
+        <div class="big-number">15</div>
+    </section>
+
+    <!-- 16. LAUNCH ANNOUNCEMENT -->
+    <section class="slide">
+        <div class="tag">НОВЫЙ ПОТОК</div>
+        <h2>Я запускаю обучение</h2>
+        <p class="highlight" style="font-size: 2.2rem; margin-top: 1rem;">«От идеи до кэша за 8 суббот»</p>
+        
+        <div class="grid" style="margin-top: 2rem;">
+            <div class="card active">
+                <h3>Зачем я это делаю?</h3>
+                <p>Мне надоело смотреть, как крутые ребята не реализуют свой потенциал и месяцами пилят проекты «в стол», боясь сделать первую продажу.</p>
+            </div>
+            <div class="card">
+                <h3>Моя цель</h3>
+                <p>Собрать банду из <b>Full-stack предпринимателей</b>, которые используют AI как рычаг, чтобы запустить актив и получить за него деньги.</p>
+            </div>
+        </div>
+        
+        <div class="big-number">START</div>
+    </section>
+
+
+    <!-- 15.5 DIFFERENTIATION -->
+    <section class="slide">
+        <div class="tag">В ЧЕМ РАЗНИЦА</div>
+        <h2>Обычно учат кодить,<br>а мы учим <span class="accent-text">зарабатывать</span></h2>
+        <div class="grid">
+            <div class="card neutral">
+                <h3>❌ Как учат везде</h3>
+                <ul class="danger-list" style="font-size: 1.2rem;">
+                    <li>«Вайб-кодинг» и змейка на Python</li>
+                    <li>Месяцы полировки архитектуры</li>
+                    <li>Релиз на ProductHunt в пустоту</li>
+                    <li><b>Итог:</b> Красивый код в столе и 0$</li>
+                </ul>
+            </div>
+            <div class="card active">
+                <h3>✅ Наш метод</h3>
+                <ul style="font-size: 1.2rem;">
+                    <li>Поиск боли, за которую УЖЕ платят</li>
+                    <li><b>Продажа идеи ДО написания кода</b></li>
+                    <li>Сборка MVP за вечер через AI</li>
+                    <li><b>Итог:</b> Работающий актив и кэш</li>
+                </ul>
+            </div>
+        </div>
+        <div class="big-number">VS</div>
+    </section>
+
+    <!-- 15.6 OUTCOMES (Compressed & Sales-Focused) -->
+    <section class="slide">
+        <div class="tag">РЕЗУЛЬТАТ</div>
+        <h2 style="font-size: 2.8rem; margin-bottom: 0.5rem;">Что на выходе?</h2>
+        <p class="highlight" style="font-size: 1.4rem; color: var(--accent); margin-bottom: 1.5rem;">Пет-проект — это не хобби. Это <span style="text-decoration: underline;">инструмент извлечения прибыли</span>.</p>
+        
+        <div class="grid" style="gap: 1rem; margin-top: 0;">
+            <div class="card active" style="padding: 1.5rem;">
+                <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">💰 Кэш-ориентированность</h3>
+                <p style="font-size: 1.1rem;">Учим продавать идею <b>раньше</b>, чем потрачен первый час на код. Главная метрика успеха — не коммиты, а деньги на счету.</p>
+            </div>
+            <div class="card" style="padding: 1.5rem;">
+                <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">🎯 Навык "Закрывателя"</h3>
+                <p style="font-size: 1.1rem;">Ты становишься тем, кто в одиночку закрывает весь цикл: нашел боль → упаковал оффер → убедил купить → выдал решение.</p>
+            </div>
+            <div class="card" style="padding: 1.5rem;">
+                <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">⚡ Скорость к деньгам</h3>
+                <p style="font-size: 1.1rem;">Срезаем путь от гипотезы до чека. Вместо месяцев разработки — запуск теста за 24 часа с помощью AI-рычага.</p>
+            </div>
+            <div class="card active" style="padding: 1.5rem;">
+                <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">🦾 Чистая прибыль 95%</h3>
+                <p style="font-size: 1.1rem;">Твой тех-отдел стоит $20/мес. Ты работаешь один, но с мощностью целой студии, оставляя всю маржу себе.</p>
+            </div>
+        </div>
+        
+        <div class="card active" style="margin-top: 1.5rem; padding: 1.2rem; border-left: 4px solid var(--accent);">
+            <p style="font-size: 1.2rem; color: #fff;"><b>Главный итог:</b> У тебя в руках не «проект для портфолио», а работающая машина по превращению идей в кэш.</p>
+        </div>
+        <div class="big-number" style="bottom: 1rem; right: 2rem;">CASH</div>
+    </section>
+
+    <!-- 21. TWO PATHS (Original/Image 5) -->
+    <section class="slide">
+        <div class="tag">ВЫБОР</div>
+        <h2>Сейчас у вас два пути:</h2>
+        <div class="card neutral" style="margin-bottom: 2rem;">
+            <p>Можно посмотреть эфир, вдохновиться — и дальше ничего не менять.</p>
+        </div>
+        <div class="card active">
+            <p style="font-size: 1.8rem;"><span class="accent-text">А можно сделать шаг</span> — и уже в январе 2026 запускать, развиваться и зарабатывать на своих продуктах.</p>
+        </div>
+        <div class="big-number">19</div>
+    </section>
+
+    <!-- 22. FINAL OFFER (Original/Image 4) -->
+    <section class="slide">
+        <div class="tag">СТАРТ СКОРО</div>
+        <h1>От идеи до кэша</h1>
+        <p class="highlight">Кто чувствует, что готов — просто напишите мне слово:</p>
+        <h2 class="accent-text" style="font-size: 5rem;">КОНКРЕТНО</h2>
+        <p>в телеграм <span class="highlight">@tkorchagin</span></p>
+        <div class="card active" style="margin-top: 2rem;">
+            <p>Моя команда свяжется с вами, мы всё обсудим и поймём — подходим ли мы друг другу.</p>
+        </div>
+        <div class="big-number">20</div>
+    </section>
+
+    <!-- 23. FINAL CLOSE (New) -->
+    <section class="slide" style="text-align: center;">
+        <div class="tag danger">ФИНАЛ</div>
+        <h2>Иду смотреть ваши сообщения...</h2>
+        <div id="timer">01:30</div>
+        <p class="highlight" style="font-size: 2rem; margin-top: 2rem;">Успей написать <span class="accent-text">"КОНКРЕТНО"</span> в личку <span class="accent-text">@tkorchagin</span>,<br> чтобы попасть на обучение</p>
+        <p>Окно скоро закроется.</p>
+        <div class="big-number">END</div>
+    </section>
+
+</div>
+
+<div class="progress-container"><div class="progress" id="progress"></div></div>
+
+<script>
+    const slides = document.querySelectorAll('.slide');
+    const progress = document.getElementById('progress');
+    const timerElement = document.getElementById('timer');
+    let currentSlide = 0;
+    let timerInterval;
+
+    function updateURL(index) {
+        const url = new URL(window.location);
+        url.searchParams.set('slide', index);
+        window.history.pushState({}, '', url);
+    }
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        let timeLeft = 300;
+        function updateDisplay() {
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            timerElement.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        updateDisplay();
+        timerInterval = setInterval(() => {
+            if (timeLeft > 0) { timeLeft--; updateDisplay(); }
+            else { clearInterval(timerInterval); timerElement.textContent = "00:00"; }
+        }, 1000);
+    }
+
+    function showSlide(index) {
+        if (index < 0 || index >= slides.length) return;
+        slides.forEach(s => s.classList.remove('active'));
+        slides[index].classList.add('active');
+        currentSlide = index;
+        progress.style.width = `${((index + 1) / slides.length) * 100}%`;
+        
+        updateURL(index);
+        if (index === slides.length - 1) { startTimer(); }
+    }
+
+    window.addEventListener('load', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const slideParam = parseInt(urlParams.get('slide'));
+        showSlide(isNaN(slideParam) ? 0 : slideParam);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') showSlide(currentSlide + 1);
+        if (e.key === 'ArrowLeft') showSlide(currentSlide - 1);
+    });
+</script>
+
+</body>
+</html>

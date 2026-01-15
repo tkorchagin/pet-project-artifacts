@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8 СУББОТ ОТ ИДЕИ ДО КЭША</title>
+    
+    <!-- SEO & Social Sharing -->
+    <meta name="description" content="Запусти пет-проект и получи первую оплату, даже если ты не кодер">
+    <meta property="og:title" content="8 СУББОТ ОТ ИДЕИ ДО КЭША">
+    <meta property="og:description" content="Запусти пет-проект и получи первую оплату, даже если ты не кодер">
+    <meta property="og:image" content="photo.jpeg">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://t.me/m/T8buvo0lMjhi">
+
+    <style>
+        /* --- RESET & VARIABLES --- */
+        :root {
+            --bg-color: #f2f1ee;
+            --ink: #0a0a0a;
+            --accent: #ff3c00; /* Safety Orange */
+            --grid-line: #d1d1cf;
+            --border-width: 2px;
+            --shadow-offset: 4px;
+            --font-display: 'Impact', 'Haettenschweiler', 'Arial Narrow Bold', sans-serif;
+            --font-body: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        ::selection { background: var(--accent); color: white; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--ink);
+            font-family: var(--font-body);
+            line-height: 1.5;
+            overflow-x: hidden;
+            background-image: radial-gradient(#d1d1cf 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* --- UTILITIES --- */
+        .container {
+            max-width: 1000px;
+            margin-top: 30px; 
+            margin-right: auto; 
+            margin-bottom: 0px; 
+            margin-left: auto;
+            padding: 0 25px; 
+            position: relative;
+            z-index: 2;
+        }
+
+        .mono { font-family: var(--font-mono); letter-spacing: -0.5px; }
+        .display { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        a { text-decoration: none; color: inherit; }
+        
+        /* КНОПКИ */
+        .btn {
+            display: inline-block;
+            background: var(--ink);
+            color: white;
+            font-family: var(--font-mono);
+            font-weight: bold;
+            text-transform: uppercase;
+            padding: 18px 32px;
+            border: var(--border-width) solid var(--ink);
+            box-shadow: var(--shadow-offset) var(--shadow-offset) 0px var(--accent);
+            transition: transform 0.1s, box-shadow 0.1s;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: calc(var(--shadow-offset) + 2px) calc(var(--shadow-offset) + 2px) 0px var(--accent);
+        }
+
+        .btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 0px 0px 0px var(--accent);
+        }
+
+        .btn.accent {
+            background: var(--accent);
+            border-color: var(--ink);
+            color: white;
+            box-shadow: var(--shadow-offset) var(--shadow-offset) 0px var(--ink);
+        }
+
+        /* ПЛАВАЮЩАЯ КНОПКА (STICKY CTA) */
+        .sticky-btn-wrapper {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 999;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .sticky-btn {
+            padding: 15px 25px;
+            font-size: 0.9rem;
+            background: var(--accent);
+            color: white;
+            border: 2px solid var(--ink);
+            box-shadow: 4px 4px 0px var(--ink);
+            font-family: var(--font-mono);
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        @keyframes floatUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-padding { padding: 10px 0; }
+        
+        /* --- MARQUEE (БЕГУЩАЯ СТРОКА) --- */
+        .top-bar-wrapper {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: var(--border-width) solid var(--ink);
+            background: var(--ink);
+        }
+
+        .marquee-container {
+            background: var(--ink);
+            color: var(--bg-color);
+            padding: 10px 0;
+            overflow: hidden;
+            width: 100%;
+        }
+        
+        .marquee-content {
+            display: inline-block;
+            white-space: nowrap;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            animation: bounce-scroll 40s linear infinite alternate;
+        }
+
+        @keyframes bounce-scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(calc(-100% + 100vw)); }
+        }
+
+        .date-strap {
+            background: var(--accent);
+            color: white;
+            text-align: center;
+            padding: 5px 0;
+            font-family: var(--font-mono);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+            position: relative;
+            z-index: 101;
+            border-bottom: 2px solid var(--ink);
+        }
+
+        /* --- HEADER --- */
+        header {
+            padding: 140px 0 80px; 
+            /* border-bottom: var(--border-width) solid var(--ink); */
+            background: transparent; 
+        }
+
+        h1 {
+            /* Базовый размер для десктопа */
+            font-size: clamp(3.5rem, 10vw, 8rem); 
+            line-height: 0.9;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        h1 .highlight { color: var(--accent); -webkit-text-stroke: 2px var(--ink); }
+
+        .hero-sub {
+            font-size: 1.25rem;
+            max-width: 600px;
+            border-left: 5px solid var(--accent);
+            padding-left: 20px;
+            margin-bottom: 40px;
+            background: rgba(255,255,255,0.5);
+            backdrop-filter: blur(2px);
+        }
+        
+        .hero-btn-wrapper { margin-bottom: 40px; }
+
+        /* --- INTRO & AUTHOR --- */
+        .author-grid {
+            display: grid;
+            grid-template-columns: 1fr 0.8fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .author-img-wrapper {
+            position: relative;
+            border: var(--border-width) solid var(--ink);
+            padding: 10px;
+            background: white;
+            transform: rotate(-2deg);
+            box-shadow: 8px 8px 0px rgba(0,0,0,0.1);
+        }
+        
+        .author-img-wrapper img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border: 1px solid #eee;
+        }
+
+        .caption {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 10px;
+            opacity: 0.7;
+        }
+
+        h2 { font-size: 2.5rem; margin-bottom: 30px; line-height: 1; }
+
+        /* --- CASES --- */
+        .cases-section {
+            background: var(--ink);
+            color: var(--bg-color);
+        }
+
+        .cases-section h2 { color: white; border-bottom: 1px solid #333; padding-bottom: 20px;}
+
+        .case-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2px;
+            background: #333;
+            border: 2px solid #333;
+        }
+
+        .case-card {
+            background: #1a1a1a;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .case-card:hover { background: #222; }
+
+        .case-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            border-bottom: 1px dashed #555;
+            padding-bottom: 10px;
+        }
+
+        .case-emoji { font-size: 2rem; }
+        .case-title { font-size: 1.2rem; font-weight: bold; color: white; }
+        .case-profit { color: var(--accent); font-family: var(--font-mono); margin-top: 5px; display: block; }
+        
+        .step-list {
+            list-style: none;
+            margin-top: 20px;
+            font-size: 0.95rem;
+            color: #ccc;
+        }
+
+        .step-list li { margin-bottom: 12px; padding-left: 20px; position: relative; }
+        .step-list li::before { content: "›"; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
+        .step-list strong { color: white; }
+
+        /* --- METHOD --- */
+        .comparison-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            border: 2px solid var(--ink);
+            margin: 40px 0;
+        }
+
+        .comp-col { padding: 40px; }
+        
+        .comp-bad {
+            border-right: 2px solid var(--ink);
+            background: #e8e8e8;
+            color: #777;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .comp-bad::before {
+            content: "";
+            position: absolute;
+            top: 50%; left: -10%; width: 120%; height: 2px;
+            background: var(--ink);
+            transform: rotate(-15deg);
+            opacity: 0.3;
+        }
+
+        .comp-good {
+            background: white;
+            position: relative;
+        }
+
+        .comp-good::after {
+            content: "★";
+            position: absolute;
+            top: 20px; right: 20px;
+            color: var(--accent);
+            font-size: 2rem;
+        }
+
+        /* --- SYLLABUS --- */
+        .syllabus-item {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            gap: 20px;
+            border-top: 2px solid var(--grid-line);
+            padding: 30px 0;
+            transition: 0.3s;
+        }
+
+        .syllabus-item:hover {
+            border-top: 2px solid var(--ink);
+            background: white;
+            padding-left: 15px;
+        }
+
+        .week-num {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            color: #ccc;
+            line-height: 0.8;
+        }
+        
+        .syllabus-item:hover .week-num { color: var(--accent); }
+
+        .week-sub { font-family: var(--font-mono); color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .week-content h3 { font-size: 1.5rem; margin-bottom: 10px; }
+        .homework-tag {
+            display: inline-block;
+            background: var(--ink);
+            color: white;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            font-family: var(--font-mono);
+            margin-top: 10px;
+        }
+
+        /* --- FAQ --- */
+        .faq-item {
+            border: 2px solid var(--ink);
+            margin-bottom: 15px;
+            background: white;
+            box-shadow: 4px 4px 0px #ddd;
+        }
+
+        .faq-question {
+            padding: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding: 0 20px;
+            background: #fafafa;
+            border-top: 1px solid var(--ink);
+        }
+        
+        .faq-item.active .faq-answer { padding: 20px; max-height: 1000px; }
+        .faq-item.active .faq-question::after { content: "-"; color: var(--accent); }
+        .faq-question::after { content: "+"; font-family: var(--font-mono); font-size: 1.5rem; }
+
+        /* --- FOOTER CTA --- */
+        .cta-section {
+            text-align: center;
+            background: var(--accent);
+            color: white;
+            border-top: var(--border-width) solid var(--ink);
+            padding-bottom: 100px;
+        }
+
+        .cta-box {
+            background: white;
+            color: var(--ink);
+            padding: 60px;
+            max-width: 800px;
+            margin: 0 auto;
+            border: 4px solid var(--ink);
+            border-bottom: none; /* Flush */
+            box-shadow: 15px 15px 0px rgba(0,0,0,0.2);
+            transform: translateY(-50px);
+            position: relative;
+            z-index: 10;
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            h1 { 
+                padding-top: 60px;
+                font-size: 5.2rem; 
+                line-height: 0.9;
+            }
+
+            .hero-sub {
+                font-size: 0.95rem;
+                line-height: 1.4;
+                margin-bottom: 60px;
+            }
+
+            .section-padding { padding: 70px 0; }
+
+            .author-grid, .comparison-section { grid-template-columns: 1fr; }
+            .comp-bad { border-right: none; border-bottom: 2px solid var(--ink); }
+            .case-grid { grid-template-columns: 1fr; }
+            .cta-box { margin: 0 10px; padding: 30px; transform: translateY(-30px); }
+            
+            .sticky-btn-wrapper {
+                bottom: 15px;
+                right: 15px;
+                left: 15px;
+                width: auto;
+            }
+            .sticky-btn {
+                display: block;
+                width: 100%;
+                text-align: center;
+                box-shadow: 3px 3px 0px var(--ink);
+            }
+        }
+
+        /* --- ANIM --- */
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+    <!-- ПЛАВАЮЩАЯ КНОПКА -->
+    <div class="sticky-btn-wrapper">
+        <a href="https://t.me/m/T8buvo0lMjhi" class="sticky-btn">⚡️ ЗАЛЕТЕТЬ В ПОТОК</a>
+    </div>
+
+    <!-- STICKY TOP -->
+    <div class="top-bar-wrapper">
+        <div class="date-strap">
+            СТАРТ 4 ЯНВАРЯ 2026
+        </div>
+        <div class="marquee-container">
+            <div class="marquee-content mono" id="marquee-text">
+            </div>
+        </div>
+    </div>
+
+    <!-- HERO -->
+    <header class="container">
+        <div class="reveal">
+            <h1 class="display">
+                8 СУББОТ<br>
+                ОТ <span class="highlight">ИДЕИ</span><br>
+                ДО <span class="highlight">КЭША</span>
+            </h1>
+            <p class="hero-sub mono">
+                Запусти пет-проект и получи первую оплату, даже если ты не кодер
+                <!-- Покажем инструменты и хаки, вместе с нами пройдешь от идеи до первой продажи + прокачаешься в AI -->
+            </p>
+            <div class="hero-btn-wrapper">
+                <a href="https://t.me/m/T8buvo0lMjhi" class="btn accent">ЗАЛЕТЕТЬ В ПОТОК</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- INTRO -->
+    <section class="container section-padding">
+        <div class="author-grid reveal">
+            <div class="text-block">
+                <h2 class="display">👋 Я Тимофей.</h2>
+                <p class="mono" style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--accent);"><strong>Я не учу «пилить стартапы». Я учу на них зарабатывать.</strong></p>
+                <p style="margin-bottom: 1rem;">В интернете полно курсов про «вайб-кодинг» и «как написать змейку на Python». Но код сам себя не продаст.</p>
+                <p>Моя суперсила — <strong style="background: var(--ink); color: white; padding: 2px 6px;">мгновенно доходить от идеи до первых пользователей</strong>, которые занесли деньги.</p>
+                
+                <div style="margin-top: 30px; padding: 20px; border: 2px dashed var(--ink);">
+                    <p class="mono" style="font-size: 0.9rem;">
+                        <strong>КТО Я ТАКОЙ:</strong><br><br>
+                        ❤️‍🔥 Сооснователь студии разработки<br>
+                        ❤️‍🔥 Вечерами запускаю свои проекты «по фану» и зарабатываю<br>
+                        ❤️‍🔥 Люблю странный UX, веду канал @scrnsht<br>
+                        ❤️‍🔥 Молодой батя
+                    </p>
+                </div>
+            </div>
+            
+            <div class="author-img-wrapper">
+                <!-- PHOTO -->
+                <img src="photo.jpeg" alt="Тимофей Корчагин">
+                <div class="caption">жена сфотографировала на пленку</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CASES -->
+    <section class="cases-section section-padding">
+        <div class="container">
+            <h2 class="display reveal">Схема на реальных примерах</h2>
+            <div class="case-grid reveal">
+                
+                <!-- Case 1 -->
+                <div class="case-card">
+                    <div>
+                        <div class="case-header">
+                            <span class="case-emoji">🎙</span>
+                            <div>
+                                <div class="case-title">AI-психолог</div>
+                                <span class="case-profit mono">Сотни тысяч / мес</span>
+                            </div>
+                        </div>
+                        <ul class="step-list">
+                            <li><strong>Боль:</strong> Подруге нужны философские ответы.</li>
+                            <li><strong>MVP:</strong> Собрал прототип в TG за 50 минут.</li>
+                            <li><strong>Тест:</strong> Сторис "Кому надо — скиньте на карту".</li>
+                            <li><strong>Итог:</strong> 30 оплат ДО написания бэкенда.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Case 2 -->
+                <div class="case-card">
+                    <div>
+                        <div class="case-header">
+                            <span class="case-emoji">🪐</span>
+                            <div>
+                                <div class="case-title">Планетки</div>
+                                <span class="case-profit mono">Продажи на автопилоте</span>
+                            </div>
+                        </div>
+                        <ul class="step-list">
+                            <li><strong>Идея:</strong> Жена залипала в игру в приложении еды.</li>
+                            <li><strong>Решение:</strong> Собрал своего бота за вечер.</li>
+                            <li><strong>Тест:</strong> Добавил в Дневничок как фичу.</li>
+                            <li><strong>Деньги:</strong> Вынес в бота, прикрутил платежку.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Case 3 -->
+                <div class="case-card">
+                    <div>
+                        <div class="case-header">
+                            <span class="case-emoji">🃏</span>
+                            <div>
+                                <div class="case-title">PauPau</div>
+                                <span class="case-profit mono">Выход на Wildberries</span>
+                            </div>
+                        </div>
+                        <ul class="step-list">
+                            <li><strong>Контекст:</strong> Рисовали символы на картах в поездке.</li>
+                            <li><strong>Дизайн:</strong> Отрисовал карты за один вечер.</li>
+                            <li><strong>Проверка:</strong> Предложил друзьям как подарок на ДР.</li>
+                            <li><strong>Итог:</strong> На предоплаты напечатал первый тираж.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Case 4 -->
+                <div class="case-card">
+                    <div>
+                        <div class="case-header">
+                            <span class="case-emoji">🇰🇿</span>
+                            <div>
+                                <div class="case-title">Конфа в КЗ</div>
+                                <span class="case-profit mono">Sold Out 100+ чел</span>
+                            </div>
+                        </div>
+                        <ul class="step-list">
+                            <li><strong>Боль:</strong> Релокантам одиноко, нужен коннект.</li>
+                            <li><strong>Тест:</strong> Сбор друзей в кальянной.</li>
+                            <li><strong>Действие:</strong> Лендинг за час, оффер по чатам.</li>
+                            <li><strong>Результат:</strong> На деньги с билетов снял зал.</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- METHOD -->
+    <section class="container section-padding">
+        <h2 class="display reveal">В чем суть метода?</h2>
+        
+        <div class="comparison-section reveal">
+            <div class="comp-col comp-bad">
+                <h3 class="mono" style="margin-bottom: 20px;">❌ Обычно учат так:</h3>
+                <p style="font-size: 1.1rem; line-height: 1.6;">
+                    Придумай идею → Месяц кодь (даже с AI это долго) → Выложи на ProductHunt → Расстройся, что никто не купил.
+                </p>
+            </div>
+            <div class="comp-col comp-good">
+                <h3 class="mono" style="margin-bottom: 20px;">✅ Мы пойдем так:</h3>
+                <p style="font-size: 1.1rem; line-height: 1.6; font-weight: bold;">
+                    Нашли боль → <span style="background: var(--accent); color: white; padding: 0 4px;">ПРОДАЛИ РЕШЕНИЕ</span> (получили деньги) → Собрали продукт за вечер с AI → Масштабировали.
+                </p>
+            </div>
+        </div>
+
+        <div class="reveal" style="margin-top: 60px;">
+            <h3 class="display" style="margin-bottom: 30px;">Почему это сработает у тебя?</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px;">
+                <div>
+                    <h4 class="mono" style="color: var(--accent); font-size: 1.2rem; margin-bottom: 10px;">01. НЕ НАДО КОДИТЬ</h4>
+                    <p><strong>Это особенно важно, если ты не разработчик.</strong> Пет-проекты — это бизнес. Мы учимся продавать. Если идею купили — код за тебя напишет нейросеть (я дам промпты).</p>
+                </div>
+                <div>
+                    <h4 class="mono" style="color: var(--accent); font-size: 1.2rem; margin-bottom: 10px;">02. УБЬЕМ СТРАХ</h4>
+                    <p>Ты не будешь пилить в стол. Ты сделаешь первую продажу другу или коллеге раньше, чем потратишь часы на разработку. Лучшее лекарство от синдрома самозванца.</p>
+                </div>
+                <div>
+                    <h4 class="mono" style="color: var(--accent); font-size: 1.2rem; margin-bottom: 10px;">03. TOTAL AI</h4>
+                    <p>Я дам хаки, как использовать нейросети везде: от анализа конкурентов и генерации офферов до написания кода и автоматизации поддержки.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SYLLABUS -->
+    <section class="container section-padding" style="border-top: var(--border-width) solid var(--ink);">
+        <h2 class="display reveal" style="margin-bottom: 60px;">ПРОГРАММА: 8 НЕДЕЛЬ</h2>
+        
+        <div class="syllabus-list reveal">
+            <!-- W1 -->
+            <div class="syllabus-item">
+                <div class="week-num">01</div>
+                <div class="week-content">
+                    <div class="week-sub">Личный созвон 1-на-1</div>
+                    <h3>ЧТО ТЕБЯ ДРАЙВИТ</h3>
+                    <p>Раскопаем, что именно тебя зажигает. Деньги? Признание? Найдем твой источник энергии, чтобы ты не слился.</p>
+                    <span class="homework-tag">📞 Точка А и Точка Б</span>
+                </div>
+            </div>
+            
+            <!-- W2 -->
+            <div class="syllabus-item">
+                <div class="week-num">02</div>
+                <div class="week-content">
+                    <div class="week-sub">Идеи & ChatGPT</div>
+                    <h3>ОТКУДА БРАТЬ ИДЕИ</h3>
+                    <p>Используем ChatGPT как партнера. Раскапываем неочевидные боли. Критерии идеи, за которую платят.</p>
+                    <span class="homework-tag">🔍 Собрать 4-5 идей</span>
+                </div>
+            </div>
+
+            <!-- W3 -->
+            <div class="syllabus-item">
+                <div class="week-num">03</div>
+                <div class="week-content">
+                    <div class="week-sub">Разведка</div>
+                    <h3>ПРОВЕРКА ДАННЫМИ</h3>
+                    <p>Инструменты разведки: Ads Library, Reddit, парсинг. Как оценить конкуренцию и пригодность для пет-проекта.</p>
+                    <span class="homework-tag">📊 Выбрать финальную идею</span>
+                </div>
+            </div>
+
+            <!-- W4 -->
+            <div class="syllabus-item">
+                <div class="week-num">04</div>
+                <div class="week-content">
+                    <div class="week-sub">Упаковка</div>
+                    <h3>КАК УПАКОВАТЬ ПРЕДЛОЖЕНИЕ</h3>
+                    <p>Лендинг, бот или пост? Как написать оффер, если не умеешь писать. Подключение оплат.</p>
+                    <span class="homework-tag">📦 Собрать упаковку</span>
+                </div>
+            </div>
+
+            <!-- W5 -->
+            <div class="syllabus-item">
+                <div class="week-num">05</div>
+                <div class="week-content">
+                    <div class="week-sub">Трафик</div>
+                    <h3>ПЕРВЫЕ ПРОДАЖИ</h3>
+                    <p>Стратегии через платную рекламу, касания в личку, работа с блогерами. AI для креативов.</p>
+                    <span class="homework-tag">💰 Получить первые оплаты</span>
+                </div>
+            </div>
+
+            <!-- W6 -->
+            <div class="syllabus-item">
+                <div class="week-num">06</div>
+                <div class="week-content">
+                    <div class="week-sub">Разработка</div>
+                    <h3>CLAUDE, CURSOR И AI-АГЕНТЫ</h3>
+                    <p>У тебя есть оплаты. Теперь строим. Пишем код вместе с AI, создаем агентов. Приглашенный гость.</p>
+                    <span class="homework-tag">🤖 Прототип продукта</span>
+                </div>
+            </div>
+
+            <!-- W7 -->
+            <div class="syllabus-item">
+                <div class="week-num">07</div>
+                <div class="week-content">
+                    <div class="week-sub">Автоматизация</div>
+                    <h3>REPLIT, N8N И MVP</h3>
+                    <p>Быстрый деплой. Связываем бота, оплаты и уведомления в одну систему через n8n.</p>
+                    <span class="homework-tag">🚀 Задеплоить рабочий MVP</span>
+                </div>
+            </div>
+
+            <!-- W8 -->
+            <div class="syllabus-item">
+                <div class="week-num">08</div>
+                <div class="week-content">
+                    <div class="week-sub">Финал</div>
+                    <h3>ВЫПУСКНОЙ</h3>
+                    <p>Подводим итоги. Разбираем, что получилось. Нетворкинг с учениками прошлых потоков.</p>
+                    <span class="homework-tag">🥂 Шампанское</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="container section-padding">
+        <h2 class="display reveal" style="margin-bottom: 40px;">Вопросы?</h2>
+        <div class="reveal">
+            
+            <div class="faq-item">
+                <div class="faq-question mono">Я гуманитарий и не умею кодить. Мне стоит идти?</div>
+                <div class="faq-answer">
+                    <p>Да. Вам будет даже проще, чем опытным разработчикам. Программисты часто уходят в бесконечное улучшение кода и архитектуры, забывая про продажи. У вас не будет этого соблазна. Вы сфокусируетесь на главном: найти клиента и продать решение. А техническую реализацию мы сделаем через AI-инструменты (Claude, Cursor). Я дам инструкции, как ставить задачи нейросетям на обычном языке, чтобы получить рабочий продукт.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question mono">Зачем мне курс, если ChatGPT напишет код бесплатно?</div>
+                <div class="faq-answer">
+                    <p>Нейросеть — это инструмент, как молоток. Она напишет код, но не скажет, <strong>что именно</strong> нужно строить. Она не остановит вас, когда вы начнете делать функцию, которая никому не нужна. На программе я даю стратегию: как найти проблему, упаковать решение и найти клиентов. AI здесь — лишь ускоритель работы, а не замена предпринимательскому мышлению.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question mono">Продавать до разработки продукта — это нормально?</div>
+                <div class="faq-answer">
+                    <p>Это единственный способ не потратить время зря. Взять деньги и исчезнуть — это мошенничество. Взять деньги (или предзаказ) и сделать продукт под конкретного клиента — это бизнес. Если после сбора оплат вы поймете, что технически не можете реализовать идею — вы просто вернете деньги. Это лучше, чем потратить два месяца на код, который окажется никому не нужен.</p>
+                </div>
+            </div>
+
+             <div class="faq-item">
+                <div class="faq-question mono">У меня нет времени, завал на работе.</div>
+                <div class="faq-answer">
+                    <p>Программа рассчитана на занятых людей. Живые разборы — утром в субботу. Домашнее задание занимает 1–2 часа в неделю. Мы используем готовые шаблоны и AI, чтобы не тратить время на рутину. Вам не придется брать отпуск или не спать ночами.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question mono">Что, если у меня нет идеи?</div>
+                <div class="faq-answer">
+                    <p>Идея не нужна на старте. Первые две недели мы занимаемся поиском и проверкой гипотез. У меня есть список проверенных ниш и методика генерации идей. Мы выберем ту, которая интересна вам и где есть платежеспособный спрос.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question mono">Можно я заплачу процент с будущих продаж?</div>
+                <div class="faq-answer">
+                    <p>Нет. Оплата участия — это подтверждение ваших намерений. Если вы не готовы инвестировать в себя, у вас не будет стимула преодолевать сложности, когда что-то пойдет не по плану.</p>
+                </div>
+            </div>
+
+             <div class="faq-item">
+                <div class="faq-question mono">Почему 8 недель, а не интенсив на выходные?</div>
+                <div class="faq-answer">
+                    <p>Чтобы получить результат без выгорания. За 2 дня можно получить эмоции, но не работающий бизнес. 8 недель нужны, чтобы спокойно пройти цикл: идея — тест — продажи — разработка — запуск. В таком ритме вы успеваете переварить информацию, сделать домашку и получить обратную связь.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question mono">А если никто не купит?</div>
+                <div class="faq-answer">
+                    <p>Такое возможно. Отсутствие продаж — это тоже результат. Это значит, что мы сэкономили вам месяцы разработки ненужного продукта. Если продаж нет, мы анализируем причины, меняем оффер или аудиторию и пробуем снова. На тарифе с менторством я помогаю докрутить предложение вручную.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- CTA FOOTER -->
+    <footer class="cta-section section-padding">
+        <div class="container">
+            <div class="cta-box reveal">
+                <h2 class="display" style="margin-bottom: 20px;">Занять место</h2>
+                <p class="mono" style="margin-bottom: 40px; font-size: 1.1rem;">
+                    Стартуем 4 января.<br>
+                    Сделай свой 2026 год годом, когда ты перестал «хотеть» и начал «получать уведомления о продажах».
+                </p>
+                <a href="https://t.me/m/T8buvo0lMjhi" class="btn accent" style="width: 100%; text-align: center;">ЗАЛЕТЕТЬ В ПОТОК</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Marquee phrases
+        const marqueePhrases = [
+            "СНАЧАЛА ПРОДАЖА, ПОТОМ КОД",
+            "ЗАРАБОТАЙ НА ПЕТ-ПРОЕКТЕ",
+            "ГИПОТЕЗА ➔ ОПЛАТА ➔ ПРОДУКТ",
+            "НЕ НАДО УМЕТЬ КОДИТЬ",
+            "AI СДЕЛАЕТ РУТИНУ",
+            // "CLAUDE И CURSOR В ПОМОЩЬ",
+            "ВАЙБ-КОДИНГ ВМЕСТО СТРАДАНИЙ",
+            "MVP ЗА ВЕЧЕР",
+            "ЗАПУСТИ И ЗАРАБОТАЙ",
+            "ТВОЙ ПОЕЗД ЕЩЁ НЕ УШЁЛ",
+            "УБЕЙ СИНДРОМ САМОЗВАНЦА",
+            "ХАКНИ СИСТЕМУ",
+            "НИКАКОЙ ВОДЫ",
+            "БЕЗ ВЫГОРАНИЯ",
+            "В СПОКОЙНОМ РИТМЕ"
+        ];
+
+        const marqueeSeparator = " ⚡️ ";
+
+        // Shuffle array function
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Initialize marquee
+        const shuffledPhrases = shuffleArray(marqueePhrases);
+        const marqueeText = shuffledPhrases.join(marqueeSeparator);
+        document.getElementById('marquee-text').innerText = marqueeText;
+
+        // Reveal Animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('active');
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // FAQ Accordion
+        document.querySelectorAll('.faq-question').forEach(item => {
+            item.addEventListener('click', () => {
+                item.parentElement.classList.toggle('active');
+            });
+        });
+    </script>
+
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript" >
+      (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+      m[i].l=1*new Date();
+      for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+      k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+      (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+      ym(97381136, "init", {
+            clickmap:true,
+            trackLinks:true,
+            accurateTrackBounce:true,
+            webvisor:true
+      });
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/97381136" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
+
+</body>
+</html>

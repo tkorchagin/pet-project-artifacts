@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вебинар: От идеи до первых денег</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600&family=Unbounded:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #080808;
+            --text-main: #E0E0E0;
+            --text-dim: #888888;
+            --accent: #FF4400; /* Яркий оранжевый вместо зеленого */
+            --accent-dim: #661100;
+            --grid-line: rgba(255, 255, 255, 0.05);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Manrope', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Фоновый шум и сетка */
+        .noise {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.05;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            z-index: 0;
+        }
+        .grid {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: 0;
+        }
+
+        /* Слайды */
+        .slide-container {
+            position: relative;
+            height: 100vh;
+            width: 100vw;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            padding: 4rem 6rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
+        /* Типографика */
+        h1, h2, h3 {
+            font-family: 'Unbounded', sans-serif;
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+
+        h1 {
+            font-size: 4.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        h1 span { color: var(--accent); }
+
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--accent);
+            padding-left: 1.5rem;
+        }
+
+        p {
+            font-size: 1.5rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            max-width: 800px;
+            color: #ccc;
+        }
+
+        .highlight {
+            color: var(--text-main);
+            font-weight: 600;
+            border-bottom: 1px solid var(--accent);
+        }
+
+        /* Элементы списка */
+        ul {
+            list-style: none;
+            margin-top: 2rem;
+        }
+
+        li {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        li::before {
+            content: '→';
+            color: var(--accent);
+            margin-right: 1rem;
+            font-weight: bold;
+            font-family: 'Unbounded', sans-serif;
+        }
+
+        /* Декоративные элементы */
+        .slide-number {
+            position: absolute;
+            bottom: 3rem;
+            right: 4rem;
+            font-family: 'Unbounded', sans-serif;
+            font-size: 10rem;
+            opacity: 0.05;
+            font-weight: 900;
+        }
+
+        .tag {
+            display: inline-block;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 0.5rem 1rem;
+            font-family: 'Unbounded', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+        }
+
+        /* Карточки кейсов */
+        .case-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            width: 100%;
+            margin-top: 2rem;
+        }
+
+        .case-card {
+            background: rgba(255,255,255, 0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 2rem;
+            transition: 0.3s;
+        }
+        
+        .case-card:hover {
+            border-color: var(--accent);
+            background: rgba(255, 68, 0, 0.05);
+        }
+
+        .case-title {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 1.2rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .hidden-hint {
+            display: none;
+        }
+
+        /* Progress Bar */
+        .progress {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.3s;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+<div class="noise"></div>
+<div class="grid"></div>
+<div class="progress" id="progressBar"></div>
+
+<div class="slide-container">
+
+    <!-- СЛАЙД 1: ВСТУПЛЕНИЕ -->
+    <div class="slide active">
+        <div class="tag">Начинаем через 2 минуты</div>
+        <h1>Проверяем <span>связь</span></h1>
+        <p>Если меня слышно и видно — напишите ваш город в чат.</p>
+        <div class="slide-number">01</div>
+    </div>
+
+    <!-- СЛАЙД 2: О ЧЕМ СЕГОДНЯ -->
+    <div class="slide">
+        <div class="tag">План встречи</div>
+        <h2>О чем пойдет речь</h2>
+        <ul>
+            <li>Почему мои пет-проекты зарабатывают, а другие лежат в GitHub</li>
+            <li>Как проверить идею и получить деньги <strong>до</strong> кода</li>
+            <li>Как ИИ заменяет отдел маркетинга и команду разработки</li>
+            <li>Презентация системы: от идеи до первой продажи за 8 недель</li>
+        </ul>
+        <div class="slide-number">02</div>
+    </div>
+
+    <!-- СЛАЙД 3: ИНТРИГА (OPEN LOOP) -->
+    <div class="slide">
+        <div class="tag">Внимание</div>
+        <h1>Только для <span>первых</span></h1>
+        <p>Сегодня особенный эфир. Канал поделится на «до» и «после».</p>
+        <p>В конце вебинара я открою доступ к предзаписи. <br> 
+        <span class="highlight">Первые 10 человек</span> получат бонус, который закроет вопрос «а вдруг не получится» навсегда.</p>
+        <p style="margin-top: 2rem; color: var(--accent); font-size: 1rem; opacity: 0.7;">// Оставайтесь до конца, чтобы узнать суть.</p>
+        <div class="slide-number">03</div>
+    </div>
+
+    <!-- СЛАЙД 4: ЭКСПЕРТ -->
+    <div class="slide">
+        <div class="tag">Кто я такой</div>
+        <h1>Тимофей <span>Корчагин</span></h1>
+        <div class="case-grid">
+            <div class="case-card">
+                <div class="case-title">Днем: Основатель студии</div>
+                <p style="font-size: 1rem; margin-bottom: 0;">Делаем сложный High-load + AI для крупного бизнеса. B2B, интеграции, хардкор.</p>
+            </div>
+            <div class="case-card">
+                <div class="case-title">Вечерами: Инди-мейкер</div>
+                <p style="font-size: 1rem; margin-bottom: 0;">Запускаю проекты в кайф по выходным. Превращаю идеи в пассивный доход без бюджета.</p>
+            </div>
+        </div>
+        <ul>
+            <li>Автор канала @scrnsht</li>
+            <li>Молодой отец (кайфую от дочки)</li>
+            <li>Не учу «стартапам», учу зарабатывать</li>
+        </ul>
+        <div class="slide-number">04</div>
+    </div>
+
+    <!-- СЛАЙД 5: STORYTELLING -->
+    <div class="slide">
+        <div class="tag">Мой путь</div>
+        <h2>Почему я этим живу?</h2>
+        <p>IT дало мне свободу, путешествия и окружение. Но настоящий кайф я поймал не в офисе.</p>
+        <p>Настоящий драйв — это когда ты за выходные собираешь что-то «по фану», а в понедельник видишь уведомление: <span class="highlight">«На ваш счет поступили средства»</span>.</p>
+        <div class="slide-number">05</div>
+    </div>
+
+    <!-- СЛАЙД 6: ФИЛОСОФИЯ (КОНТЕНТ) -->
+    <div class="slide">
+        <div class="tag">Главная ошибка</div>
+        <h1>Код сам себя <br>не <span>продаст</span></h1>
+        <div class="case-grid">
+            <div class="case-card" style="opacity: 0.5;">
+                <div class="case-title">❌ Как делают обычно</div>
+                <p style="font-size: 1rem;">Придумал → Полгода писал код → Выложил → Никому не нужно → Депрессия</p>
+            </div>
+            <div class="case-card" style="border-color: var(--accent);">
+                <div class="case-title" style="color: var(--text-main);">✅ Мой метод</div>
+                <p style="font-size: 1rem;">Нашел боль → <strong style="color:var(--accent)">ПРОДАЛ РЕШЕНИЕ</strong> → Собрал MVP с AI за вечер → Масштабировал</p>
+            </div>
+        </div>
+        <div class="slide-number">06</div>
+    </div>
+
+    <!-- СЛАЙД 7: ИНТЕРАКТИВ -->
+    <div class="slide">
+        <div class="tag">Вопрос к залу</div>
+        <h2>У кого пылятся проекты?</h2>
+        <p>Поставьте <span style="color: var(--accent); font-weight: bold; font-size: 2rem;">+</span> в чат, если у вас есть идеи или недоделанные проекты, которые вы боитесь показать миру.</p>
+        <div class="slide-number">07</div>
+    </div>
+
+    <!-- СЛАЙД 8: КЕЙСЫ -->
+    <div class="slide">
+        <div class="tag">Практика</div>
+        <h1>Как это работает <span>в реальности</span></h1>
+        <div class="case-grid">
+            <div class="case-card">
+                <div class="case-title">🎙 Дневничок (AI-психолог)</div>
+                <p style="font-size: 1rem;">Собрал прототип за 50 минут. Первые 30 оплат получил через сторис ДО того, как написал сложный бэкенд.</p>
+            </div>
+            <div class="case-card">
+                <div class="case-title">🪐 Игра «Планетки»</div>
+                <p style="font-size: 1rem;">Заметил, во что залипает жена. Сделал лучше. Теперь проект живет сам и приносит продажи на автопилоте.</p>
+            </div>
+            <div class="case-card">
+                <div class="case-title">🃏 Настолка PauPau</div>
+                <p style="font-size: 1rem;">Отрисовал дизайн → Собрал предзаказы с друзей → На эти деньги напечатал тираж.</p>
+            </div>
+            <div class="case-card">
+                <div class="case-title">🇰🇿 Конфа в Казахстане</div>
+                <p style="font-size: 1rem;">Лендинг за час. Sold Out на 100+ человек. Бюджет на аренду зала — с проданных билетов.</p>
+            </div>
+        </div>
+        <div class="slide-number">08</div>
+    </div>
+
+    <!-- СЛАЙД 9: ВЫВОД КЕЙСОВ -->
+    <div class="slide">
+        <div class="tag">Суть метода</div>
+        <h2>Я не умею предсказывать будущее</h2>
+        <p>Поэтому я <span>сначала беру деньги</span>, а потом делаю продукт.</p>
+        <p>Это убивает страх «это никому не нужно».</p>
+        <div class="slide-number">09</div>
+    </div>
+
+    <!-- СЛАЙД 10: ПРЕЗЕНТАЦИЯ ПРОДУКТА -->
+    <div class="slide">
+        <div class="tag">Новая программа</div>
+        <h1>От идеи до первой продажи <br>за <span>8 недель</span></h1>
+        <p>Не просто «покодить». А создать актив.</p>
+        <p>С помощью Claude, Cursor и AI-агентов. Даже если ты не программист.</p>
+        <div class="slide-number">10</div>
+    </div>
+
+    <!-- СЛАЙД 11: ДЛЯ КОГО -->
+    <div class="slide">
+        <div class="tag">Для кого это</div>
+        <ul>
+            <li><strong>Разработчики с "AI-FOMO":</strong> Хотите превратить код в кэш, а не в коммиты.</li>
+            <li><strong>Не кодеры (Менеджеры/Маркетологи):</strong> Есть идеи, но думаете, что без команды разработчиков ничего не выйдет. (Спойлер: выйдет, ИИ напишет код).</li>
+            <li><strong>Предприниматели:</strong> Чтобы быстро тестировать гипотезы без раздувания штата.</li>
+        </ul>
+        <div class="slide-number">11</div>
+    </div>
+
+    <!-- СЛАЙД 12: ПРОГРАММА 1 -->
+    <div class="slide">
+        <div class="tag">Дорожная карта</div>
+        <h2>Первый месяц: Фундамент</h2>
+        <div style="display: flex; gap: 2rem; margin-top: 2rem;">
+            <div style="flex: 1;">
+                <h3 style="font-size: 1.5rem; color: var(--accent);">Неделя 1-2</h3>
+                <p style="font-size: 1rem;">Поиск «Того самого». Анализ рынка через AI за 30 минут. Ищем идею, за которую готовы платить.</p>
+            </div>
+            <div style="flex: 1;">
+                <h3 style="font-size: 1.5rem; color: var(--accent);">Неделя 3-4</h3>
+                <p style="font-size: 1rem;">Упаковка и Тест. Делаем оффер. Запускаем простой лендинг/бота. Получаем первые реакции деньгами.</p>
+            </div>
+        </div>
+        <div class="slide-number">12</div>
+    </div>
+
+    <!-- СЛАЙД 13: ПРОГРАММА 2 -->
+    <div class="slide">
+        <div class="tag">Дорожная карта</div>
+        <h2>Второй месяц: Реализация AI</h2>
+        <div style="display: flex; gap: 2rem; margin-top: 2rem;">
+            <div style="flex: 1;">
+                <h3 style="font-size: 1.5rem; color: var(--accent);">Неделя 5-6</h3>
+                <p style="font-size: 1rem;">Сборка продукта. Claude + Cursor. Пишем код руками нейросетей. Собираем агентов.</p>
+            </div>
+            <div style="flex: 1;">
+                <h3 style="font-size: 1.5rem; color: var(--accent);">Неделя 7-8</h3>
+                <p style="font-size: 1rem;">Автоматизация и Масштаб. n8n, Replit. Делаем так, чтобы работало само.</p>
+            </div>
+        </div>
+        <div class="slide-number">13</div>
+    </div>
+
+    <!-- СЛАЙД 14: ЗАКРЫТЫЙ КАНАЛ -->
+    <div class="slide">
+        <div class="tag">Экосистема</div>
+        <h1>Больше, чем курс</h1>
+        <p>Это закрытое комьюнити. Мы делимся промптами, связками и поддерживаем, когда опускаются руки.</p>
+        <p>Живые разборы каждую субботу.</p>
+        <div class="slide-number">14</div>
+    </div>
+
+    <!-- СЛАЙД 15: CTA -->
+    <div class="slide">
+        <div class="tag">Действуй</div>
+        <h1>Займи свое <span>место</span></h1>
+        <p>Стартуем 4 января. Сделай 2026 год годом, когда ты начал получать уведомления о продажах.</p>
+        <p style="margin-top: 3rem; font-size: 2rem; color: var(--accent);">ссылка на анкету предзаписи ↓</p>
+        <p style="font-size: 1rem; opacity: 0.6; margin-top: 1rem;">*Первые 10 получают особый бонус</p>
+        <div class="slide-number">15</div>
+    </div>
+
+</div>
+
+<script>
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    let currentSlide = 0;
+
+    function showSlide(index) {
+        if (index < 0) index = 0;
+        if (index >= slides.length) index = slides.length - 1;
+        
+        slides.forEach(slide => slide.classList.remove('active'));
+        slides[index].classList.add('active');
+        
+        currentSlide = index;
+        
+        // Update progress bar
+        const progress = ((index + 1) / slides.length) * 100;
+        progressBar.style.width = `${progress}%`;
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+            showSlide(currentSlide + 1);
+        } else if (e.key === 'ArrowLeft') {
+            showSlide(currentSlide - 1);
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        // Simple navigation on click (optional)
+        const screenWidth = window.innerWidth;
+        if (e.clientX > screenWidth / 2) {
+            showSlide(currentSlide + 1);
+        } else {
+            showSlide(currentSlide - 1);
+        }
+    });
+
+    // Initial show
+    showSlide(0);
+</script>
+
+</body>
+</html>

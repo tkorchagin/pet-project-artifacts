@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сессия: Поиск Драйва</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600&family=Unbounded:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #0f0f11;
+            --text-main: #f0f0f0;
+            --text-muted: #888888;
+            --accent: #ccff00; 
+            --accent-dim: rgba(204, 255, 0, 0.1);
+            --danger: #ff4d4d;
+            --danger-dim: rgba(255, 77, 77, 0.1);
+            --purple: #bf5af2;
+            --surface: #1a1a1c;
+            --surface-light: #252528;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: var(--bg); color: var(--text-main); font-family: 'Manrope', sans-serif; overflow: hidden; height: 100vh; width: 100vw; transition: all 0.3s ease; }
+
+        /* Gender Logic */
+        body.gender-m .f-text { display: none; }
+        body.gender-f .m-text { display: none; }
+
+        .deck { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; visibility: hidden; transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); transform: scale(0.98) translateY(20px); display: flex; flex-direction: column; justify-content: center; padding: 4rem 8rem; background: var(--bg); z-index: 1; }
+        .slide.active { opacity: 1; visibility: visible; transform: scale(1) translateY(0); z-index: 10; }
+
+        h1, h2, h3 { font-family: 'Unbounded', sans-serif; text-transform: uppercase; line-height: 1.1; letter-spacing: -0.02em; }
+        h1 { font-size: 4.5rem; color: var(--accent); margin-bottom: 1.5rem; }
+        h2 { font-size: 3.5rem; margin-bottom: 1rem; color: #fff; }
+        h3 { font-size: 1.8rem; margin-bottom: 1rem; color: #fff; }
+        p { font-size: 1.6rem; line-height: 1.5; color: var(--text-muted); max-width: 1100px; margin-bottom: 1rem; }
+        
+        .highlight { color: var(--text-main); font-weight: 600; }
+        .accent-text { color: var(--accent); }
+        .danger-text { color: var(--danger); }
+        .purple-text { color: var(--purple); }
+
+        .tag { display: inline-block; background: var(--surface-light); color: #fff; padding: 0.5rem 1rem; border-radius: 4px; font-family: 'Unbounded', sans-serif; font-size: 0.8rem; margin-bottom: 2rem; text-transform: uppercase; }
+        .tag.purple { color: var(--purple); border: 1px solid var(--purple); background: transparent; }
+        
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2.5rem; margin-top: 1.5rem; }
+        
+        .card { background: var(--surface); padding: 2.5rem; border-radius: 20px; border: 1px solid #333; position: relative; }
+        .card.active { border-color: var(--accent); }
+        .card.purple { border-color: var(--purple); }
+        .card.danger { border-left: 4px solid var(--danger); }
+
+        .big-number { font-size: 6rem; font-family: 'Unbounded', sans-serif; color: var(--surface); -webkit-text-stroke: 2px var(--surface-light); position: absolute; right: 4rem; bottom: 3rem; z-index: -1; opacity: 0.3; }
+
+        ul { list-style: none; }
+        li { font-size: 1.6rem; margin-bottom: 1.2rem; display: flex; align-items: start; color: var(--text-muted); }
+        li::before { content: "→"; color: var(--accent); margin-right: 1.2rem; font-family: 'Unbounded', sans-serif; flex-shrink: 0; }
+        
+        .blitz-list li { font-size: 2rem; color: var(--text-main); margin-bottom: 2rem; }
+        .blitz-list li::before { content: "⚡"; color: var(--purple); }
+
+        .quote { font-size: 2.2rem; line-height: 1.3; color: var(--text-main); margin: 2rem 0; border-left: 4px solid var(--accent); padding-left: 2rem; font-style: italic; }
+        
+        .fill-in { border-bottom: 2px solid #555; color: var(--accent); padding: 0 1rem; display: inline-block; min-width: 150px; text-align: center; }
+        .fill-in.danger { color: var(--danger); border-color: var(--danger-dim); }
+
+        .prompt-box {
+            margin-top: 1.5rem;
+            padding: 1.5rem 2rem;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            font-size: 1.5rem; 
+            line-height: 1.4;
+            color: #ccc;
+            font-family: 'Manrope', monospace;
+            display: block;
+        }
+        .prompt-box strong { color: #fff; font-weight: 700; display: block; margin-bottom: 0.5rem; }
+
+        .btn {
+            display: inline-block;
+            background: var(--accent);
+            color: #000;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-family: 'Unbounded', sans-serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-top: 1rem;
+            transition: transform 0.2s;
+        }
+        .btn:hover { transform: scale(1.05); }
+
+        /* Gender Switcher */
+        .gender-switch {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid #333;
+            color: #666;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-family: 'Unbounded', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            user-select: none;
+        }
+        .gender-switch:hover { color: #fff; border-color: #666; }
+        .gender-switch span.active { color: var(--accent); font-weight: bold; }
+
+        .progress-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: #222; z-index: 100; }
+        .progress { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s ease; }
+    </style>
+</head>
+<body class="gender-m">
+
+<!-- GENDER SWITCHER -->
+<div class="gender-switch" onclick="toggleGender()">
+    <span id="label-m" class="active">M</span> / <span id="label-f">Ж</span>
+</div>
+
+<div class="deck" id="deck">
+
+    <!-- 1. START -->
+    <section class="slide active">
+        <div class="tag">РАСПАКОВКА</div>
+        <h1>Поиск Драйва</h1>
+        <p class="highlight" style="font-size: 2rem;">Найти твой движок.<br>Понять, что ты готов<span class="f-text">а</span> терпеть.<br>Собрать инструкцию к себе.</p>
+        <div class="card" style="margin-top: 2rem; border-style: dashed; opacity: 0.7;">
+            <p style="font-size: 1.4rem; margin-bottom: 0;">🛠 Возьми блокнот. Слайды будут задавать тебе вопросы.</p>
+        </div>
+        <div class="big-number">01</div>
+    </section>
+
+    <!-- 6. ROADMAP -->
+    <section class="slide">
+        <div class="tag">НАВИГАЦИЯ</div>
+        <h2>План на час</h2>
+        <p>Мы не будем усложнять. Сделаем три простые вещи:</p>
+        <ul style="margin-top: 2rem;">
+            <li><b>1. Где была искра?</b> Вспомним моменты, когда тебя пёрло.</li>
+            <li><b>2. Скрытый мотор.</b> Поймем, что тебя злит и заводит (даже если это "неправильно").</li>
+            <li><b>3. Инструкция к себе.</b> Соберем формулу: ради чего ты готов<span class="f-text">а</span> стараться.</li>
+        </ul>
+        <div class="big-number">02</div>
+    </section>
+
+    <!-- 2. SELF-REALIZATION -->
+    <section class="slide">
+        <div class="tag">ЛОВУШКА</div>
+        <h2>Проблема найма</h2>
+        <div class="grid">
+            <div class="card" style="border-color: #444; opacity: 0.8;">
+                <h3>🏢 В корпорации</h3>
+                <p>Размытый вклад. Если продажи выросли — это твоя заслуга или просто бренд крутой? Ты растешь, или растет компания?</p>
+            </div>
+            <div class="card active">
+                <h3>🚀 В своем проекте</h3>
+                <p>Тут всё честно и прозрачно. Получилось? Ты красавчик. Это дает дикое ощущение <b>"Я МОГУ"</b>.</p>
+            </div>
+        </div>
+        <div class="big-number">03</div>
+    </section>
+
+    <!-- 3. SALES CRINGE (NEW) -->
+    <section class="slide">
+        <div class="tag danger">БАРЬЕР</div>
+        <h2 class="danger-text">Продавать — это кринж</h2>
+        <p class="highlight">Писать незнакомым людям, предлагать услугу, обсуждать повышение. Это страшно и неприятно.</p>
+        <div class="card active" style="margin-top: 2rem;">
+            <p style="font-size: 1.8rem;">«Сила воли кончается, а кринж остаётся».</p>
+            <div class="prompt-box" style="margin-top: 1.5rem;">
+                Единственное, что сильнее кринжа — это <b>эмоция от цели</b>. Когда ты четко видишь, что на другой стороне этого разговора — твоя мечта.
+            </div>
+        </div>
+        <div class="big-number">04</div>
+    </section>
+
+    <!-- 4. PET PROJECTS (NEW) -->
+    <section class="slide">
+        <div class="tag">ТОПЛИВО</div>
+        <h2>Марафон без начальника</h2>
+        <p>В твоем проекте никто не уволит за пропущенный дедлайн. Никто не спросит "где результат?".</p>
+        <div class="grid">
+            <div class="card danger">
+                <h3>💀 Почему умирают проекты</h3>
+                <p>Заканчивается запал. Становится лень писать код после работы. Страшно идти продавать.</p>
+            </div>
+            <div class="card active">
+                <h3>🚀 Как дойти до конца</h3>
+                <p>Драйв — это практический инструмент. Ты находишь причину, которая <b>сильнее лени</b>, и она тащит тебя через всё остальное.</p>
+            </div>
+        </div>
+        <div class="big-number">05</div>
+    </section>
+
+    <!-- NEW SLIDE 1: SUCCESS METRICS (UPDATED TEXT) -->
+    <section class="slide">
+        <div class="tag">KPI КУРСА</div>
+        <h2>Что мы считаем победой?</h2>
+        <p>Деньги — важно. Но если ты думаешь, что победа — это только цифра на счёте, ты смотришь на верхушку айсберга.</p>
+        
+        <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem;">
+            <div class="card active" style="padding: 1.2rem;">
+                <h3 class="accent-text" style="font-size: 1.4rem;">🦁 Победил<span class="f-text">а</span> кринж</h3>
+                <p style="font-size: 1rem; margin:0;">Ты написал<span class="f-text">а</span> незнакомым людям. Услышал<span class="f-text">а</span> «нет» — и не умер<span class="f-text">ла</span>. Кринж остался, но он тебя больше не останавливает.</p>
+            </div>
+            <div class="card active" style="padding: 1.2rem;">
+                <h3 class="accent-text" style="font-size: 1.4rem;">🤝 Наш<span class="m-text">ел</span><span class="f-text">ла</span> своих</h3>
+                <p style="font-size: 1rem; margin:0;">Ты больше не од<span class="m-text">ин</span><span class="f-text">на</span> со своим проектом. Рядом те, кто поддержит. С такими можно горы свернуть.</p>
+            </div>
+            <div class="card active" style="padding: 1.2rem;">
+                <h3 class="accent-text" style="font-size: 1.4rem;">⚡️ Начал<span class="f-text">а</span> запускать</h3>
+                <p style="font-size: 1rem; margin:0;">Раньше ты месяцами вынашивал<span class="f-text">а</span> идею. Теперь ты проверяешь гипотезы за 24 часа. Это суперсила.</p>
+            </div>
+            <div class="card active" style="padding: 1.2rem;">
+                <h3 class="accent-text" style="font-size: 1.4rem;">🧠 Понял<span class="f-text">а</span> систему</h3>
+                <p style="font-size: 1rem; margin:0;">В голове не каша из «надо бы». Есть план. Есть следующий шаг. Есть понимание, как дойти от идеи до денег.</p>
+            </div>
+        </div>
+        
+        <div class="prompt-box" style="margin-top: 1.5rem; text-align: center; font-size: 1.2rem;">
+            Ты не просто заработал<span class="f-text">а</span>. Ты стал<span class="f-text">а</span> человеком, который умеет превращать идеи в деньги. <br><b style="color: #fff;">И это с тобой навсегда.</b>
+        </div>
+        <div class="big-number">18</div>
+    </section>
+
+    <!-- NEW SLIDE 3: COMMUNITY -->
+    <section class="slide">
+        <div class="tag">ОКРУЖЕНИЕ</div>
+        <h2>Как работает комьюнити</h2>
+        <p>Это не тусовка. Это система, которая не даст тебе слиться.</p>
+        
+        <div class="grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+            <div class="card purple" style="padding: 1.5rem;">
+                <h3>Бадди</h3>
+                <p style="font-size: 1rem;">Твой напарник. Созвоны, чтобы держать темп и не сливаться.</p>
+            </div>
+            <div class="card purple" style="padding: 1.5rem;">
+                <h3>Safe Zone</h3>
+                <p style="font-size: 1rem;">Здесь можно задать самый "тупой" вопрос. Тебя не осудят, тебе помогут.</p>
+            </div>
+            <div class="card purple" style="padding: 1.5rem;">
+                <h3>Разборы</h3>
+                <p style="font-size: 1rem;">Мы здесь, чтобы разогнать твою идею до первых денег.</p>
+            </div>
+        </div>
+        <div class="big-number">20</div>
+    </section>
+
+    <!-- 7. RULES -->
+    <section class="slide">
+        <div class="tag">ПРАВИЛА</div>
+        <h2>Как отвечаем?</h2>
+        <div class="grid">
+            <div class="card active">
+                <h3>✅ Честно</h3>
+                <p>Если хочешь власти — пиши "власть". Если хочешь, чтобы все отстали — пиши так.</p>
+            </div>
+            <div class="card danger">
+                <h3>🚫 Без цензуры</h3>
+                <p>Не пытайся казаться «хорош<span class="m-text">им</span><span class="f-text">ей</span>» или «правильн<span class="m-text">ым</span><span class="f-text">ой</span>». Мы ищем твой настоящий движок.</p>
+            </div>
+        </div>
+        <div class="big-number">07</div>
+    </section>
+
+    <!-- 5. PERSONAL EXAMPLE -->
+    <section class="slide">
+        <div class="tag">ЛИЧНЫЙ ОПЫТ</div>
+        <h2>Что драйвит меня?</h2>
+        <p class="highlight">Я понял, что работаю не ради цифр на счете, а ради трех вещей:</p>
+        
+        <div class="grid" style="grid-template-columns: 1fr; gap: 1rem;">
+            <div class="card active" style="padding: 1.5rem; display: flex; align-items: start; gap: 1rem;">
+                <span style="font-size: 2rem;">🌉</span>
+                <p style="margin:0; font-size: 1.3rem;"><b>Потрогать недостижимое.</b> Жить в Сан-Франциско казалось недостижимым, 300к выручки, купить макбук, поехать в Италию.</p>
+            </div>
+            <div class="card active" style="padding: 1.5rem; display: flex; align-items: start; gap: 1rem;">
+                <span style="font-size: 2rem;">👏</span>
+                <p style="margin:0; font-size: 1.3rem;"><b>Признание.</b> Когда я делаю что-то и получаю признание и деньги, как нетворк, лекция, настолки, хакатон, фотосессия.</p>
+            </div>
+            <div class="card active" style="padding: 1.5rem; display: flex; align-items: start; gap: 1rem;">
+                <span style="font-size: 2rem;">⛺️</span>
+                <p style="margin:0; font-size: 1.3rem;"><b>Делать с друзьями.</b> Походы, разметка, мастерилки, отдых, путешествия.</p>
+            </div>
+        </div>
+        <div class="big-number">06</div>
+    </section>
+
+    <!-- 8. PART 1: PAST -->
+    <section class="slide">
+        <div class="tag">ЧАСТЬ 1</div>
+        <h2>Разбор прошлого</h2>
+        <p>Ищем ситуации "Потока". Когда время исчезало?</p>
+        <div class="card active" style="margin-top: 2rem;">
+            <h3>Вспомни 3 ситуации за год, когда ты залип<span class="f-text">ла</span> в процесс:</h3>
+            <div class="prompt-box">
+                <strong>👉 ВОПРОСЫ:</strong>
+                1. Что конкретно ты делал<span class="f-text">а</span> (руками/головой)?<br>
+                2. Какой был контекст (один / спасал<span class="f-text">а</span> мир / был<span class="f-text">а</span> в толпе)?
+            </div>
+        </div>
+        <div class="big-number">08</div>
+    </section>
+
+    <!-- 9. PART 1: THE DRAIN -->
+    <section class="slide">
+        <div class="tag danger">СЛИВ ЭНЕРГИИ</div>
+        <h2 class="danger-text">Что тебя убивает?</h2>
+        <p>Задачи, от которых через 15 минут ты устал<span class="f-text">а</span>.</p>
+        <div class="card danger" style="margin-top: 2rem;">
+            <h3>Вспомни 2 ситуации "тупняка":</h3>
+            <div class="prompt-box">
+                <strong>👉 ВОПРОС:</strong>
+                Почему стало скучно?<br>
+                <span style="opacity:0.8; font-size: 0.9em;">Ищи истинную причину: не видел<span class="f-text">а</span> смысла? Боял<span class="m-text">ся</span><span class="f-text">ась</span> облажаться?</span>
+            </div>
+        </div>
+        <div class="big-number">09</div>
+    </section>
+
+    <!-- 10. PART 1.5: PATTERN -->
+    <section class="slide">
+        <div class="tag">ИТОГ ЧАСТИ 1</div>
+        <h2>Что общего?</h2>
+        <p class="highlight">Посмотри на свои ответы.</p>
+        
+        <div class="card active" style="margin-top: 1rem;">
+            <p style="font-size: 2rem;">«Похоже, я заряжаюсь от:<br>
+            <span class="fill-in">[................................]</span>»</p>
+        </div>
+
+        <div class="card danger" style="margin-top: 1rem;">
+            <p style="font-size: 2rem;">«Я теряю силы, когда начинается:<br>
+            <span class="fill-in danger">[................................]</span>»</p>
+        </div>
+        <div class="big-number">10</div>
+    </section>
+
+    <!-- 11. PART 2: ENDURANCE -->
+    <section class="slide">
+        <div class="tag">ЧАСТЬ 2</div>
+        <h2>Проверка на прочность</h2>
+        <p class="highlight">Любимое дело — это не когда всегда весело. Это когда ты готов<span class="f-text">а</span> терпеть трудности ради результата.</p>
+        <div class="grid">
+            <div class="card active">
+                <h3>🛡 Где ты ТАНК?</h3>
+                <p>Было сложно, больно, но ты дошел<span class="f-text">ла</span> до конца.</p>
+                <div class="prompt-box" style="margin-top: 1rem;">
+                    <strong>👉 ВОПРОС:</strong><br>
+                    Ради чего терпел<span class="f-text">а</span>? Что было наградой?
+                </div>
+            </div>
+            <div class="card danger">
+                <h3>🏳 Где ты СЛИЛСЯ<span class="m-text">ЛСЯ</span><span class="f-text">ЛАСЬ</span>?</h3>
+                <p>Бросил<span class="f-text">а</span> на полпути.</p>
+                <div class="prompt-box" style="margin-top: 1rem;">
+                    <strong>👉 ВОПРОС:</strong><br>
+                    Честно: почему? Стало скучно или не было смысла?
+                </div>
+            </div>
+        </div>
+        <div class="big-number">11</div>
+    </section>
+
+    <!-- 12. PART 2.3: ENDURANCE PATTERN -->
+    <section class="slide">
+        <div class="tag">ВЫВОД ЧАСТИ 2</div>
+        <h2>Твоя "цена" успеха</h2>
+        <p>Запиши этот вывод.</p>
+        
+        <div class="card active" style="margin-top: 2rem;">
+            <p style="font-size: 2rem; line-height: 1.6;">
+                «Я готов<span class="f-text">а</span> терпеть <span class="fill-in danger">[.............]</span>,<br>
+                если в конце будет: <span class="fill-in">[....................]</span>»
+            </p>
+        </div>
+        
+        <div class="card danger" style="margin-top: 1.5rem;">
+            <p style="font-size: 2rem; line-height: 1.6;">
+                «Я точно брошу,<br>
+                если: <span class="fill-in danger">[....................]</span>»
+            </p>
+        </div>
+        <div class="big-number">12</div>
+    </section>
+
+    <!-- 13. PART 3: HIDDEN ENGINE -->
+    <section class="slide">
+        <div class="tag purple">ЧАСТЬ 3</div>
+        <h2 style="color: var(--purple);">Скрытый мотор</h2>
+        <p>Иногда нас драйвит злость, гордость или желание доказать. Это нормально.</p>
+        <div class="card purple" style="margin-top: 2rem;">
+            <h3>⚡ БЛИЦ-ОПРОС</h3>
+            <p>Отвечай первое, что приходит в голову. Не думай.</p>
+        </div>
+        <div class="big-number">13</div>
+    </section>
+
+    <!-- 14. BLITZ QUESTIONS -->
+    <section class="slide">
+        <div class="tag purple">БЛИЦ</div>
+        <h2 style="font-size: 2.5rem; margin-bottom: 2rem;">Закончи фразу:</h2>
+        <ul class="blitz-list">
+            <li>Меня дико бесит, когда люди вокруг...</li>
+            <li>Я не понимаю, почему нельзя просто взять и...</li>
+            <li>Если бы было бесконечно денег, я бы все равно...</li>
+            <li>В детстве я мог<span class="f-text">ла </span> часами...</li>
+            <li>Мне физически плохо, если я долго не...</li>
+        </ul>
+        <div class="big-number">14</div>
+    </section>
+
+    <!-- 15. HEROES -->
+    <section class="slide">
+        <div class="tag purple">ГЕРОИ</div>
+        <h2>Кто крутой?</h2>
+        <p>Вспомни 1-2 персонажей (фильмы/жизнь), которые тебе нравятся.</p>
+        <div class="grid">
+            <div class="card purple">
+                <h3>Персонаж №1</h3>
+                <div class="prompt-box">
+                    <strong>👉 ВОПРОС:</strong><br>
+                    Что в нем цепляет? (Ум? Наглость? Власть? Свобода?)
+                </div>
+            </div>
+            <div class="card purple">
+                <h3>Секрет</h3>
+                <div class="prompt-box">
+                    То, что тебе нравится в них — это <b>твои</b> скрытые желания.
+                </div>
+            </div>
+        </div>
+        <div class="big-number">15</div>
+    </section>
+
+    <!-- 16. ARTIFACT -->
+    <section class="slide">
+        <div class="tag">СБОРКА</div>
+        <h2>Собираем конструктор</h2>
+        <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="card" style="padding: 1.5rem;">
+                <h3 class="accent-text">1. ЧТО ДЕЛАЮ?</h3>
+                <p style="font-size: 1.2rem; color: #aaa;">Мой любимый процесс</p>
+            </div>
+            <div class="card" style="padding: 1.5rem;">
+                <h3 class="accent-text">2. ГДЕ Я?</h3>
+                <p style="font-size: 1.2rem; color: #aaa;">Идеальная обстановка</p>
+            </div>
+            <div class="card" style="padding: 1.5rem;">
+                <h3 class="accent-text">3. НАГРАДА</h3>
+                <p style="font-size: 1.2rem; color: #aaa;">Ради чего я пашу?</p>
+            </div>
+            <div class="card danger" style="padding: 1.5rem; border-color: var(--danger);">
+                <h3 class="danger-text">4. ТРУДНОСТИ</h3>
+                <p style="font-size: 1.2rem; color: #aaa;">Что готов<span class="f-text">а</span> терпеть?</p>
+            </div>
+        </div>
+        <div class="big-number">16</div>
+    </section>
+
+    <!-- 17. FINAL FORMULA -->
+    <section class="slide">
+        <div class="tag">ИТОГ</div>
+        <h2>Твоя Формула</h2>
+        <div class="card active" style="margin-top: 2rem;">
+            <p style="font-size: 1.8rem; line-height: 1.6;">
+                «Я чувствую драйв, когда <span class="fill-in">[ПРОЦЕСС]</span><br>
+                в условиях <span class="fill-in">[ОБСТАНОВКА]</span>,<br>
+                чтобы получить <span class="fill-in">[НАГРАДА]</span>.<br><br>
+                Ради этого я готов<span class="f-text">а</span> терпеть <span class="fill-in danger">[ТРУДНОСТИ]</span>».
+            </p>
+        </div>
+        <div class="big-number">17</div>
+    </section>
+
+    <!-- 18. HOMEWORK -->
+    <section class="slide">
+        <div class="tag">ДАЛЬШЕ</div>
+        <h2>Домашнее задание</h2>
+        <p class="highlight">Чтобы закрепить результат, заполни таблицу.</p>
+        <ul style="margin-top: 2rem;">
+            <li>Навыки и интересы</li>
+            <li>Анализ моментов счастья (Топ-5)</li>
+            <li>Агрессивные цели</li>
+            <li>Референсы и Анти-референсы</li>
+        </ul>
+        <div class="card" style="margin-top: 2rem; text-align: center; border: none; background: transparent;">
+            <a href="https://docs.google.com/spreadsheets/d/19VO_YG3gpXGBmBTzuLBIrM9kkseKvqfUrcjdjqMn1qM/edit?gid=0#gid=0" target="_blank" class="btn">Открыть таблицу</a>
+        </div>
+        <div class="big-number">18</div>
+    </section>
+
+</div>
+
+<div class="progress-container"><div class="progress" id="progress"></div></div>
+
+<script>
+    const slides = document.querySelectorAll('.slide');
+    const progress = document.getElementById('progress');
+    let currentSlide = 0;
+
+    // GENDER LOGIC
+    function toggleGender() {
+        const body = document.body;
+        const labelM = document.getElementById('label-m');
+        const labelF = document.getElementById('label-f');
+
+        if (body.classList.contains('gender-m')) {
+            body.classList.replace('gender-m', 'gender-f');
+            labelM.classList.remove('active');
+            labelF.classList.add('active');
+        } else {
+            body.classList.replace('gender-f', 'gender-m');
+            labelF.classList.remove('active');
+            labelM.classList.add('active');
+        }
+    }
+
+    function updateURL(index) {
+        const url = new URL(window.location);
+        url.searchParams.set('slide', index);
+        window.history.pushState({}, '', url);
+    }
+
+    function showSlide(index) {
+        if (index < 0 || index >= slides.length) return;
+        slides.forEach(s => s.classList.remove('active'));
+        slides[index].classList.add('active');
+        currentSlide = index;
+        progress.style.width = `${((index + 1) / slides.length) * 100}%`;
+        updateURL(index);
+    }
+
+    window.addEventListener('load', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const slideParam = parseInt(urlParams.get('slide'));
+        showSlide(isNaN(slideParam) ? 0 : slideParam);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') showSlide(currentSlide + 1);
+        if (e.key === 'ArrowLeft') showSlide(currentSlide - 1);
+    });
+</script>
+
+</body>
+</html>

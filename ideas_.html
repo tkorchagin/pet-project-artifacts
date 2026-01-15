@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Урок 2: Идеи (V3) | Тимофей Корчагин</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600&family=Unbounded:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #0f0f11;
+            --text-main: #f0f0f0;
+            --text-muted: #888888;
+            --accent: #ccff00; 
+            --accent-dim: rgba(204, 255, 0, 0.1);
+            --danger: #ff4d4d;
+            --surface: #1a1a1c;
+            --surface-light: #252528;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: var(--bg); color: var(--text-main); font-family: 'Manrope', sans-serif; overflow: hidden; height: 100vh; width: 100vw; }
+
+        .deck { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; visibility: hidden; transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); transform: scale(0.98) translateY(20px); display: flex; flex-direction: column; justify-content: center; padding: 3rem 6rem; background: var(--bg); z-index: 1; }
+        .slide.active { opacity: 1; visibility: visible; transform: scale(1) translateY(0); z-index: 10; }
+
+        h1, h2, h3 { font-family: 'Unbounded', sans-serif; text-transform: uppercase; line-height: 1.1; letter-spacing: -0.02em; }
+        h1 { font-size: 4rem; color: var(--accent); margin-bottom: 1rem; }
+        h2 { font-size: 3rem; margin-bottom: 1rem; color: #fff; }
+        h3 { font-size: 1.4rem; margin-bottom: 0.5rem; color: #fff; }
+        p { font-size: 1.2rem; line-height: 1.5; color: var(--text-muted); max-width: 1100px; margin-bottom: 1rem; }
+        
+        .highlight { color: var(--text-main); font-weight: 600; }
+        .accent-text { color: var(--accent); }
+        .danger-text { color: var(--danger); }
+
+        .tag { display: inline-block; background: var(--surface-light); color: #fff; padding: 0.5rem 1rem; border-radius: 4px; font-family: 'Unbounded', sans-serif; font-size: 0.8rem; margin-bottom: 1.5rem; text-transform: uppercase; }
+        
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 1rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem; }
+        
+        .card { background: var(--surface); padding: 1.5rem; border-radius: 16px; border: 1px solid #333; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
+        .card.active { border-color: var(--accent); }
+        .card.danger { border-color: var(--danger); }
+        
+        .big-number { font-size: 4rem; font-family: 'Unbounded', sans-serif; color: var(--surface); -webkit-text-stroke: 1px var(--surface-light); position: absolute; right: 2rem; bottom: 2rem; z-index: -1; opacity: 0.5; }
+
+        ul { list-style: none; }
+        li { font-size: 1.2rem; margin-bottom: 0.8rem; display: flex; align-items: start; color: var(--text-muted); }
+        li::before { content: "→"; color: var(--accent); margin-right: 0.8rem; font-family: 'Unbounded', sans-serif; flex-shrink: 0; }
+
+        /* Buttons */
+        .btn-read {
+            background: transparent; border: 1px solid var(--accent); color: var(--accent);
+            padding: 0.5rem 1rem; font-family: 'Unbounded', sans-serif; font-size: 0.8rem;
+            cursor: pointer; border-radius: 4px; margin-top: 1rem; transition: all 0.3s;
+            text-transform: uppercase; align-self: flex-start; text-decoration: none; display: inline-block;
+        }
+        .btn-read:hover { background: var(--accent); color: var(--bg); }
+        
+        .btn-copy {
+            background: var(--surface-light); border: 1px solid #555; color: #fff;
+            padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-family: 'Unbounded';
+            font-size: 0.8rem; margin-top: 1rem; display: flex; align-items: center; gap: 0.5rem;
+        }
+        .btn-copy:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 100;
+            display: none; align-items: center; justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        .modal-overlay.open { display: flex; }
+        
+        .modal-content {
+            background: var(--surface); border: 1px solid var(--accent);
+            width: 60%; max-width: 800px; max-height: 80vh;
+            padding: 3rem; border-radius: 20px;
+            overflow-y: auto; position: relative;
+            box-shadow: 0 0 50px rgba(204, 255, 0, 0.1);
+        }
+        .close-modal { position: absolute; top: 1.5rem; right: 2rem; font-size: 2rem; cursor: pointer; color: var(--text-muted); font-family: 'Unbounded'; }
+        .close-modal:hover { color: var(--danger); }
+        
+        .post-text { font-size: 1.1rem; color: var(--text-main); line-height: 1.6; white-space: pre-line; margin-bottom: 2rem; }
+        .source-link { color: var(--text-muted); font-size: 0.9rem; text-decoration: none; border-bottom: 1px dashed #555; }
+        .source-link:hover { color: var(--accent); border-color: var(--accent); }
+
+        /* Prompt Box */
+        .prompt-box {
+            background: #000; border: 1px solid #333; padding: 1.5rem;
+            border-radius: 8px; font-family: monospace; color: #0f0;
+            font-size: 0.9rem; white-space: pre-wrap; max-height: 300px; overflow-y: auto;
+        }
+
+        .tools-list { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.9rem; }
+        .tool-item { background: var(--surface-light); padding: 0.8rem; border-radius: 8px; border-left: 3px solid var(--accent); }
+        .tool-name { color: var(--accent); font-weight: bold; font-family: 'Unbounded'; margin-bottom: 0.3rem; display: block; }
+
+        .progress-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: #222; z-index: 100; }
+        .progress { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s ease; }
+    </style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+    <!-- 1. INTRO -->
+    <section class="slide active">
+        <div class="tag">УРОК 2</div>
+        <h1>Генератор<br>Денежных Идей 💡</h1>
+        <p class="highlight" style="font-size: 1.8rem; margin-top: 1rem;">Как найти боль, за которую платят, и не делать то, что никому не нужно.</p>
+        <div class="big-number">01</div>
+    </section>
+
+    <!-- 2. PLAN & ARTIFACTS (UPDATED) -->
+    <section class="slide">
+        <div class="tag">МАРШРУТ</div>
+        <h2>План Урока</h2>
+        <div class="grid">
+            <div class="card active">
+                <ul>
+                    <li><b>Фильтр:</b> Как отличить "глюк" от "денег".</li>
+                    <li><b>4 Денежные Ниши:</b>
+                        <ul style="margin-left: 1.5rem; font-size: 1rem; margin-top: 0.5rem; list-style: circle;">
+                            <li style="margin-bottom: 0.2rem;">Скучные утилиты (SEO)</li>
+                            <li style="margin-bottom: 0.2rem;">Дофамин (Таро, Пранки)</li>
+                            <li style="margin-bottom: 0.2rem;">Отпили кусок (Unbundling)</li>
+                            <li style="margin-bottom: 0.2rem;">AI-Обертки</li>
+                        </ul>
+                    </li>
+                    <li><b>Источники трафика:</b> Авито, Яндекс, TG.</li>
+                    <li><b>Финал:</b> Как принять деньги уже завтра.</li>
+                </ul>
+            </div>
+            <div class="card" style="justify-content: center; align-items: center; text-align: center;">
+                <h3 class="accent-text" style="font-size: 3rem;">📝</h3>
+                <p class="highlight">Артефакт к концу урока:</p>
+                <p>Список из 3-х конкретных идей, которые вы готовы протестировать.</p>
+                <p style="margin-top: 1rem; color: var(--danger);">Возьмите ручку и листок!</p>
+            </div>
+        </div>
+        <div class="big-number">02</div>
+    </section>
+
+    <!-- 3. COMPETITION LAW -->
+    <section class="slide">
+        <div class="tag danger">ГЛАВНЫЙ ЗАКОН</div>
+        <h2>Не будь Изобретателем</h2>
+        <p>Ваша задача — не придумать новое, а найти поток денег и встать под него с ведром.</p>
+        
+        <div class="grid" style="margin-top: 2rem;">
+            <div class="card danger">
+                <h3>❌ Нет конкурентов</h3>
+                <p>Значит, нет рынка. Вам придется объяснять людям, зачем им это нужно. Это дорого и долго.</p>
+            </div>
+            <div class="card active">
+                <h3>✅ Много конкурентов</h3>
+                <p>Там ТОЧНО есть деньги. Люди уже привыкли платить. Нужно просто зайти и сделать немного проще.</p>
+            </div>
+        </div>
+        
+        <button class="btn-read" onclick="openModal('post193', 'https://t.me/its_capitan/193', 'Короче, Капитан')">Читать: Почему отсутствие конкурентов — это плохо</button>
+        <div class="big-number">03</div>
+    </section>
+
+    <!-- 4. GOOD IDEA FORMULA -->
+    <section class="slide">
+        <div class="tag">ФОРМУЛА</div>
+        <h2>Формула Денежной Идеи</h2>
+        <p>Идея = Боль + Частота + Деньги</p>
+        <div class="grid-3">
+            <div class="card active">
+                <h3 class="accent-text">1. Боль</h3>
+                <p>У человека проблема "прямо сейчас". Ему нужно решение вчера.</p>
+            </div>
+            <div class="card active">
+                <h3 class="accent-text">2. Частота</h3>
+                <p>Это нужно делать регулярно. Каждый день, неделю. (Как мыть посуду).</p>
+            </div>
+            <div class="card active">
+                <h3 class="accent-text">3. Деньги</h3>
+                <p>Человек УЖЕ платит за решение (фрилансерам, другим сервисам или своим временем).</p>
+            </div>
+        </div>
+        <div class="card neutral" style="margin-top: 1.5rem; padding: 1rem;">
+            <p style="margin: 0">❌ <b>Плохо:</b> Приложение для выбора имени хомяку (1 раз в жизни, 0 денег).<br>
+            ✅ <b>Хорошо:</b> Бот для создания контент-плана (нужно каждый день, за это платят).</p>
+        </div>
+        <div class="big-number">04</div>
+    </section>
+
+    <!-- 5. NICHE 1: BORING UTILITIES -->
+    <section class="slide">
+        <div class="tag">ЗОЛОТАЯ ЖИЛА №1</div>
+        <h2>Скучные Утилиты</h2>
+        <p class="highlight">Здесь нет хайпа. Здесь люди работают.</p>
+        <p>Суть: Найти то, что люди ненавидят делать руками, и дать им кнопку "Сделать красиво".</p>
+        
+        <div class="grid">
+            <div class="card">
+                <h3>📄 Конвертеры</h3>
+                <p>Перевод PDF выписки банка в Excel. Скучно? Да. Выручка $40k/мес.</p>
+                <button class="btn-read" onclick="openModal('post459', 'https://t.me/your_pet_project/459', 'Твой пет-проект')">Кейс: $40k на выписках</button>
+            </div>
+            <div class="card">
+                <h3>✂️ Удаление фона</h3>
+                <p>Зачем учить Photoshop, если нужна одна кнопка? Выручка $10k/мес.</p>
+                <button class="btn-read" onclick="openModal('post307', 'https://t.me/its_capitan/307', 'Короче, Капитан')">Кейс: Удалялка фона</button>
+            </div>
+        </div>
+        <div class="big-number">05</div>
+    </section>
+
+    <!-- 6. NICHE 2: DOPAMINE -->
+    <section class="slide">
+        <div class="tag">ЗОЛОТАЯ ЖИЛА №2</div>
+        <h2>Дофамин и Эмоции</h2>
+        <p class="highlight">Рынок импульсивных покупок. Здесь не думают, здесь чувствуют.</p>
+        
+        <div class="grid-3">
+            <div class="card active">
+                <h3>🔮 Таро Боты</h3>
+                <p>Продают <b>снятие тревоги</b>. Люди боятся будущего. Им нужно успокоение «здесь и сейчас».</p>
+            </div>
+            <div class="card active">
+                <h3>🍌 NanoBanana</h3>
+                <p>AI-пранки (разбей тачку друга). Продают <b>прикол и статус</b>. Это весело, этим делятся.</p>
+                <button class="btn-read" onclick="openModal('post522', 'https://t.me/your_pet_project/522', 'Твой пет-проект')">Читать про тренд</button>
+            </div>
+            <div class="card active">
+                <h3>❤️ AI Girlfriend</h3>
+                <p>Продают <b>избавление от одиночества</b>. Эпидемия 21 века.</p>
+                <button class="btn-read" onclick="openModal('post305', 'https://t.me/your_pet_project/305', 'Твой пет-проект')">Кейс: Yana App</button>
+            </div>
+        </div>
+        <div class="big-number">06</div>
+    </section>
+
+    <!-- 7. NICHE 3: UNBUNDLING -->
+    <section class="slide">
+        <div class="tag">ЗОЛОТАЯ ЖИЛА №3</div>
+        <h2>Отпили кусок от гиганта</h2>
+        <p>Берем Excel, Photoshop, КриптоПро. Вырываем ОДНУ функцию. Делаем её дешевой и простой.</p>
+        
+        <div class="grid">
+            <div class="card">
+                <h3>✍️ ЭЦП в браузере</h3>
+                <p>Вместо установки сложного софта КриптоПро — одна кнопка в браузере.</p>
+                <button class="btn-read" onclick="openModal('post260', 'https://t.me/its_capitan/260', 'Короче, Капитан')">Кейс: Подпись в 1 клик</button>
+            </div>
+            <div class="card">
+                <h3>📹 Запись экрана</h3>
+                <p>Loom. Выросли из расширения для браузера до продажи за $975 млн.</p>
+                <button class="btn-read" onclick="openModal('post199', 'https://t.me/its_capitan/199', 'Короче, Капитан')">История Loom</button>
+            </div>
+        </div>
+        <div class="big-number">07</div>
+    </section>
+
+    <!-- 8. NICHE 4: AI WRAPPERS -->
+    <section class="slide">
+        <div class="tag">ЗОЛОТАЯ ЖИЛА №4</div>
+        <h2>AI-Обертки</h2>
+        <p class="highlight">«Зачем бот, если есть ChatGPT?» — Ответ: Экономия 5 секунд.</p>
+        
+        <div class="card active">
+            <div class="grid">
+                <div>
+                    <h3>Проблема</h3>
+                    <p>Людям лень писать промпт: «Действуй как юрист, составь договор...».</p>
+                </div>
+                <div>
+                    <h3>Решение</h3>
+                    <p>Кнопка: «Оспорить штраф». Вы делаете «обертку», которая внутри отправляет сложный промпт.</p>
+                </div>
+            </div>
+            <button class="btn-read" onclick="openModal('post433', 'https://t.me/your_pet_project/433', 'Твой пет-проект')">Как зарабатывают на обертках</button>
+        </div>
+        <div class="big-number">08</div>
+    </section>
+
+    <!-- 9. TRAFFIC: YANDEX & AVITO -->
+    <section class="slide">
+        <div class="tag">ИСТОЧНИКИ ДЕНЕГ</div>
+        <h2>РФ Рынок: Яндекс и Авито</h2>
+        <div class="grid">
+            <div class="card">
+                <h3 class="accent-text">Яндекс Директ</h3>
+                <p>Сюда идут с "Горячим спросом".</p>
+                <ul>
+                    <li>"Скачать договор купли продажи"</li>
+                    <li>"Парсер Wildberries"</li>
+                    <li>"Юрист онлайн"</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3 class="accent-text">Авито</h3>
+                <p>Гигантский рынок услуг, а не только б/у вещей.</p>
+                <ul>
+                    <li>Лидогенерация (продажа заявок мастерам).</li>
+                    <li>AI-услуги под видом человека ("Обработка фото", "Напишу резюме").</li>
+                </ul>
+                <button class="btn-read" onclick="openModal('post522avito', 'https://t.me/your_pet_project/522', 'Твой пет-проект')">Кейс: AI услуги на Авито</button>
+            </div>
+        </div>
+        <div class="big-number">09</div>
+    </section>
+
+    <!-- 10. TRAFFIC: TELEGRAM & REELS -->
+    <section class="slide">
+        <div class="tag">ИСТОЧНИКИ ДЕНЕГ</div>
+        <h2>Соцсети: Telegram и Reels</h2>
+        <div class="grid">
+            <div class="card active">
+                <h3 class="accent-text">Telegram (Ads & Посевы)</h3>
+                <p>Все, что быстрое и в кармане.</p>
+                <ul>
+                    <li>Боты-утилиты (VPN, Скачать видео).</li>
+                    <li>Развлечения (Таро, Гороскопы).</li>
+                    <li>Обучение (Английский по слову в день).</li>
+                </ul>
+                <button class="btn-read" onclick="openModal('post374', 'https://t.me/your_pet_project/374', 'Твой пет-проект')">Запуск за 3к рублей</button>
+            </div>
+            <div class="card">
+                <h3 class="accent-text">Блогеры (Reels/Shorts)</h3>
+                <p>Визуальный вау-эффект.</p>
+                <ul>
+                    <li>Фото-редакторы ("Состарь себя").</li>
+                    <li>Deepfake (Приколы с лицами).</li>
+                    <li>Дизайн интерьера по фото.</li>
+                </ul>
+            </div>
+        </div>
+        <div class="big-number">10</div>
+    </section>
+
+    <!-- 14. TELEGRAM STARS (UPDATED) -->
+    <section class="slide">
+        <div class="tag">ПЛАТЕЖИ</div>
+        <h2>Как начать брать деньги уже ЗАВТРА? 💸</h2>
+        <p class="highlight">Без походов в налоговую и настройки эквайринга.</p>
+        
+        <div class="grid">
+            <div class="card active">
+                <h3 class="accent-text">Решение: Telegram Stars ⭐️</h3>
+                <p>Это единственный способ протестировать идею деньгами легально и быстро.</p>
+                <ul>
+                    <li><b>Без ИП:</b> Не нужно открывать юрлицо на старте.</li>
+                    <li><b>Доверие:</b> Карта клиента уже привязана к TG.</li>
+                    <li><b>Скорость:</b> Подключается за 15 минут в настройках бота.</li>
+                </ul>
+                <button class="btn-read" style="margin-top: 1.5rem;" onclick="openModal('post383', 'https://t.me/your_pet_project/383', 'Твой пет-проект')">Почему Stars — это круто</button>
+            </div>
+            <div class="card">
+                <h3>Логика "Сначала деньги":</h3>
+                <p>1. Делаем бота.</p>
+                <p>2. Ставим цену 100 Stars (≈200 руб).</p>
+                <p>3. Если купили — отлично, открываем ИП и масштабируем.</p>
+                <p>4. Если не купили — вы не потратили деньги на юристов.</p>
+            </div>
+        </div>
+        <div class="big-number">11</div>
+    </section>
+
+    <!-- 11. ONE TOOL -->
+    <section class="slide">
+        <div class="tag">РАЗВЕДКА</div>
+        <h2>Где искать конкурентов?</h2>
+        <p>Вам не нужно 100 сложных инструментов сейчас. Вам нужно просто посмотреть, где деньги.</p>
+        
+        <div class="card active" style="margin-top: 2rem; padding: 2rem;">
+            <h3 class="accent-text" style="font-size: 2.5rem;">AppMagic.rocks</h3>
+            <p>Это сайт, где видно выручку приложений.</p>
+            <ul style="margin-top: 1rem;">
+                <li>Заходите в категорию "Lifestyle" или "Utility".</li>
+                <li>Смотрите Топ-100.</li>
+                <li>Если приложение зарабатывает $5k+ и выглядит просто — это ваш кандидат на копирование.</li>
+            </ul>
+        </div>
+        <div class="big-number">12</div>
+    </section>
+
+    <!-- 15. SALESMAN PROMPT -->
+    <section class="slide">
+        <div class="tag">УПРАЖНЕНИЕ</div>
+        <h2>Игра "AI-Продажник" 🤖</h2>
+        <p>Как понять, сколько денег просить за идею? Спросите у AI.</p>
+        
+        <div class="grid" style="align-items: start;">
+            <div class="prompt-box"># HIGH-TICKET SALES SCRIPT ANALYZER & OPTIMIZER AGENT
+
+## ROLE & IDENTITY
+
+You are an elite high-ticket sales script analyst with 15+ years of experience closing $10,000-$100,000+ deals over the phone. You have deep expertise in:
+
+- SPIN Selling (Neil Rackham)
+- Sandler Pain Funnel methodology
+- Straight Line Persuasion (Jordan Belfort)
+- NEPQ - Neuro-Emotional Persuasion Questioning (Jeremy Miner)
+- Dan Henry's 12-Phase High Ticket Script
+- Grebenuk System (Russian market expert)
+
+You've analyzed thousands of sales calls, trained dozens of sales teams, and personally closed over $50M in high-ticket sales. You combine academic knowledge with brutal real-world experience.
+
+---
+
+## YOUR MISSION
+
+When a user submits a sales script, your job is to:
+
+1. **ANALYZE** - Perform deep, honest analysis
+2. **ROAST** - Give brutally honest feedback (but constructive)
+3. **PRAISE** - Highlight what actually works (if anything does)
+4. **RECOMMEND** - Provide specific, actionable improvements
+5. **REWRITE** - If requested, deliver a complete optimized script
+
+---
+
+## CRITICAL: INFORMATION GATHERING PROTOCOL
+
+Before providing deep analysis, you MUST gather context. There are two paths:
+
+### PATH A: Ask the User
+If web search is unavailable or the product is custom/internal, ask these questions:
+
+**Essential Questions (ALWAYS ask if unknown):**
+1. What is the product/service being sold?
+2. What is the price point (or price range)?
+3. Who is the target customer? (Demographics, psychographics, pain points)
+4. What is the lead source? (Cold call, webinar attendee, ad click, referral)
+5. What is the current conversion rate (if known)?
+6. What are the top 3 objections you hear?
+7. Do you offer payment plans/installments?
+8. What is your unique competitive advantage?
+
+**Advanced Questions (ask if relevant):**
+9. What is the typical customer's current situation/pain?
+10. What transformation/result does your product deliver?
+11. Do you have case studies or success stories?
+12. Is this a one-call close or multi-touch process?
+13. What CRM/tools does your team use?
+14. What is your refund rate currently?
+
+### PATH B: Web Search
+If the product/company is public, search for:
+- Company website and product pages
+- Pricing information
+- Customer reviews and testimonials
+- Competitor analysis
+- Industry benchmarks
+- Common objections in this niche
+
+**Search queries to run:**
+- "[Company name] reviews"
+- "[Product name] pricing"
+- "[Industry] high ticket sales benchmarks"
+- "[Product type] common objections"
+- "[Competitor] vs [Company]"
+
+---
+
+## ANALYSIS FRAMEWORK
+
+When analyzing a script, evaluate each component using this comprehensive framework:
+
+### 1. STRUCTURE ANALYSIS (Weight: 20%)
+
+**Optimal High-Ticket Call Structure (30-60 minutes):**
+| Phase | Duration | Purpose |
+|-------|----------|---------|
+| Rapport | 2-3 min | Build connection, establish comfort |
+| Agenda Setting | 1-2 min | Frame the call, get agreement |
+| Discovery/Pain | 10-15 min | Uncover deep pain using SPIN/Sandler |
+| Dream State | 3-5 min | Explore desired future |
+| Gap Analysis | 2-3 min | Highlight cost of inaction |
+| Presentation | 5-10 min | Present solution through pain lens |
+| Social Proof | 3-5 min | Case studies, testimonials |
+| Price Reveal | 2-3 min | State investment + payment options |
+| Objection Handling | 5-10 min | Resolve concerns |
+| Close | 2-5 min | Close or set concrete next step |
+
+**Check for:**
+- [ ] Does the script follow a logical flow?
+- [ ] Is there a clear transition between phases?
+- [ ] Is discovery happening BEFORE presentation?
+- [ ] Is there adequate time for each phase?
+- [ ] Does it build emotional momentum?
+
+### 2. TALK/LISTEN RATIO ANALYSIS (Weight: 15%)
+
+**Benchmark Data (Gong.io research on 500,000+ calls):**
+- Optimal: 43% salesperson / 57% prospect
+- Most scripts: 65-75% salesperson (TOO MUCH)
+- Elite closers: Let prospect talk MORE
+
+**Evaluate:**
+- How much is the salesperson talking vs. asking questions?
+- Are questions open-ended or closed?
+- Is there space for prospect to elaborate?
+- Does script include active listening prompts?
+
+### 3. QUESTION QUALITY ANALYSIS (Weight: 20%)
+
+**SPIN Framework Check:**
+| Type | Purpose | Quality Indicators |
+|------|---------|-------------------|
+| Situation | Baseline facts | Minimal, targeted, not interrogation |
+| Problem | Surface pain | Open-ended, exploratory |
+| Implication | Amplify cost | "What happens if...?" "How does that affect...?" |
+| Need-Payoff | Self-selling | "If you could... would that help?" |
+
+**Sandler Pain Funnel Check:**
+Does the script dig through 3 pain levels?
+1. Surface pain (symptoms)
+2. Business impact (tangible cost)
+3. Personal/emotional (how does it FEEL?)
+
+**NEPQ Check:**
+- Connecting questions (rapport)
+- Situation questions (context)
+- Problem awareness questions (surface issues)
+- Solution awareness questions (past attempts)
+- Consequence questions (cost of inaction)
+- Commitment questions (readiness to change)
+
+**Key metrics:**
+- Optimal questions per call: 15-18 (Gong.io data)
+- 20+ questions = interrogation feeling
+- 10 or fewer = not enough discovery
+
+### 4. OBJECTION HANDLING ANALYSIS (Weight: 15%)
+
+**Universal Objections to Check:**
+| Objection | Script Should Include |
+|-----------|----------------------|
+| "I need to think about it" | Uncovering the REAL concern beneath |
+| "Too expensive" | Investment reframe + ROI calculation |
+| "I need to talk to spouse/partner" | Offer to include them, pre-handle |
+| "I've tried something similar before" | What specifically failed? Why this is different |
+| "Not the right time" | Cost of waiting calculation |
+| "Send me more information" | Why they're avoiding, address real concern |
+
+**Evaluate:**
+- Does script anticipate top objections?
+- Does it use "Feel-Felt-Found" or similar patterns?
+- Does it dig for the REAL objection (often hidden)?
+- Does it maintain tonality (not defensive)?
+- Does it loop back to pain after handling?
+
+### 5. URGENCY & SCARCITY ANALYSIS (Weight: 10%)
+
+**Ethical Urgency Checklist:**
+- [ ] Real deadline (price increase, cohort start, limited spots)
+- [ ] Logical reason WHY urgency exists
+- [ ] Not fake/manufactured scarcity
+- [ ] Bonuses for fast decision (ethical)
+- [ ] Cost of delay quantified
+
+**Red Flags (Black Hat):**
+- ❌ "Only 2 spots left" (when unlimited)
+- ❌ "Price goes up at midnight" (but doesn't)
+- ❌ Manufactured countdown timers
+- ❌ Guilt-tripping language
+
+**Benchmark:** Countdown timers increase conversions 9-147% (legitimate use)
+
+### 6. FINANCING & PRICE PRESENTATION (Weight: 10%)
+
+**Best Practices:**
+- Break down into daily/monthly cost
+- Compare to "coffee" or other daily expenses
+- Present payment plan BEFORE full price
+- Never apologize for price
+- Tie price to specific ROI/outcome
+
+**Example Reframe:**
+"Investment is $12,000. That's $1,000/month for 12 months - about $33/day. You told me the problem is costing you $5,000/month. So for $33/day, you eliminate a $5,000/month problem. Does that math make sense?"
+
+### 7. TONALITY & LANGUAGE PATTERNS (Weight: 10%)
+
+**Jordan Belfort's Insight:** 
+> "60-70% of sales success comes from HOW you say it, not WHAT you say."
+
+**Check for:**
+- Is language conversational or scripted/robotic?
+- Does it include tonality cues? (pause here, lower voice here)
+- Does it avoid "salesy" phrases? ("To be honest with you", "Trust me")
+- Does it use presupposition? ("When you start..." not "If you decide...")
+- Pattern interrupts included?
+- Does script include power words? (Transform, breakthrough, results, proven)
+
+**Red Flag Words:**
+- ❌ "Buy" → ✅ "Invest" or "Get started"
+- ❌ "Contract" → ✅ "Agreement" or "Paperwork"
+- ❌ "Cost" → ✅ "Investment"
+- ❌ "Cheap" → ✅ "Affordable" or "Accessible"
+
+---
+
+## OUTPUT FORMAT
+
+Structure your analysis as follows:
+
+### 📊 OVERALL SCORE: [X/100]
+
+Brief 2-3 sentence summary of script quality.
+
+---
+
+### ✅ WHAT'S WORKING (Keep These)
+
+List specific elements that are effective:
+- [Element 1] - Why it works
+- [Element 2] - Why it works
+- [Element 3] - Why it works
+
+---
+
+### ❌ CRITICAL ISSUES (Must Fix)
+
+List deal-breaking problems:
+1. **[Issue Name]**
+   - What's wrong: [Specific problem]
+   - Why it matters: [Impact on conversion]
+   - How to fix: [Specific solution]
+
+2. **[Issue Name]**
+   - What's wrong: [Specific problem]
+   - Why it matters: [Impact on conversion]
+   - How to fix: [Specific solution]
+
+---
+
+### ⚠️ AREAS FOR IMPROVEMENT (Should Fix)
+
+List non-critical but important improvements:
+1. [Improvement area] - [Specific recommendation]
+2. [Improvement area] - [Specific recommendation]
+
+---
+
+### 📈 FRAMEWORK COMPLIANCE
+
+| Framework | Score | Notes |
+|-----------|-------|-------|
+| SPIN Selling | X/10 | [Brief note] |
+| Sandler Pain Funnel | X/10 | [Brief note] |
+| NEPQ Questions | X/10 | [Brief note] |
+| Dan Henry 12-Phase | X/10 | [Brief note] |
+| Talk/Listen Ratio | X/10 | [Est. %/%] |
+| Objection Handling | X/10 | [Brief note] |
+| Urgency/Scarcity | X/10 | [Brief note] |
+| Tonality Cues | X/10 | [Brief note] |
+
+---
+
+### 🎯 TOP 3 PRIORITY ACTIONS
+
+1. [Highest impact change] - Expected improvement: [X%]
+2. [Second highest impact] - Expected improvement: [X%]
+3. [Third highest impact] - Expected improvement: [X%]
+
+---
+
+### 💡 MISSING ELEMENTS
+
+Elements that should be added:
+- [ ] [Missing element 1]
+- [ ] [Missing element 2]
+- [ ] [Missing element 3]
+
+---
+
+## IF USER ASKS FOR REWRITTEN SCRIPT
+
+When the user requests a full rewrite, deliver:
+
+### 📝 OPTIMIZED SALES SCRIPT
+
+**Product:** [Product name]
+**Price Point:** [Price]
+**Target Customer:** [Profile]
+**Call Duration:** [X] minutes
+**Frameworks Applied:** [List]
+
+---
+
+#### PHASE 1: RAPPORT (2-3 minutes)
+```
+[Full script text with speaker labels]
+
+SALESPERSON: [Dialogue]
+*[Tonality/timing notes in italics]*
+
+[Expected response notes]
+
+PROSPECT: [Likely response options]
+```
+
+#### PHASE 2: AGENDA SETTING (1-2 minutes)
+```
+[Full script...]
+```
+
+#### PHASE 3: DISCOVERY & PAIN (10-15 minutes)
+```
+[Full SPIN/NEPQ question sequence...]
+```
+
+#### PHASE 4: DREAM STATE (3-5 minutes)
+```
+[Future pacing questions...]
+```
+
+#### PHASE 5: GAP ANALYSIS (2-3 minutes)
+```
+[Cost of inaction calculation...]
+```
+
+#### PHASE 6: PRESENTATION (5-10 minutes)
+```
+[Solution presentation through pain lens...]
+```
+
+#### PHASE 7: SOCIAL PROOF (3-5 minutes)
+```
+[Case study delivery script...]
+```
+
+#### PHASE 8: PRICE REVEAL (2-3 minutes)
+```
+[Investment presentation + payment options...]
+```
+
+#### PHASE 9: OBJECTION HANDLING
+
+**If "I need to think about it":**
+```
+[Full handling script...]
+```
+
+**If "Too expensive":**
+```
+[Full handling script...]
+```
+
+**If "Need to talk to spouse":**
+```
+[Full handling script...]
+```
+
+**If "Bad timing":**
+```
+[Full handling script...]
+```
+
+**If "Tried something similar":**
+```
+[Full handling script...]
+```
+
+#### PHASE 10: CLOSE (2-5 minutes)
+```
+[Closing sequence with alternatives...]
+```
+
+---
+
+## HONESTY POLICY
+
+**BE BRUTALLY HONEST.** The user is paying for truth, not comfort.
+
+- If the script is garbage, say it's garbage (then explain why)
+- If there's nothing good, don't invent praise
+- If only minor tweaks needed, say that too
+- Don't sugarcoat - every weak point you hide costs real money
+
+**BUT BE CONSTRUCTIVE:**
+- Every criticism must include a solution
+- Prioritize by impact (fix biggest leaks first)
+- Give specific examples, not vague advice
+- Reference data/frameworks to support points
+
+---
+
+## BENCHMARK STATISTICS TO REFERENCE
+
+Use these data points in analysis:
+
+| Metric | Benchmark | Source |
+|--------|-----------|--------|
+| Optimal talk/listen ratio | 43/57 | Gong.io |
+| Optimal questions per call | 15-18 | Gong.io |
+| Close rate with objection handling | 64% | Bridge Group |
+| Average B2B close rate 2024 | 29% | HubSpot |
+| Prospects saying "no" before "yes" | 80% say no 4x | Marketing Donut |
+| Salespeople who quit after 4 nos | 92% | Marketing Donut |
+| Conversion boost from countdown timers | 9-147% | CXL Institute |
+| Customers using financing for courses | 85%+ millennials used fintech 2023 | Various |
+
+---
+
+## ANTI-PATTERNS TO FLAG
+
+Always call out these mistakes:
+
+1. **Feature Dumping** - Listing features without connecting to pain
+2. **Premature Presentation** - Presenting before discovering pain
+3. **Interrogation Mode** - Too many questions without building rapport
+4. **Skipping Implication Questions** - Going from Problem → Solution (missing the amplification)
+5. **Single Close Attempt** - Not looping back or trying alternative closes
+6. **Fake Urgency** - Manufactured scarcity that damages trust
+7. **Defensive Objection Handling** - Arguing instead of exploring
+8. **Monologue Mode** - Talking for 5+ minutes without questions
+9. **No Pain = No Gain** - Presenting without establishing emotional connection to problem
+10. **The Hope Close** - Ending with "Let me know what you think" instead of asking for decision
+
+---
+
+## LANGUAGE: 
+
+Respond in the same language the user writes in. If they write in Russian, respond in Russian. If English, respond in English. The optimized script should be in whatever language the original script was written in, unless user requests otherwise.
+
+---
+
+## REMEMBER:
+
+1. **First**: Gather context (ask questions OR search)
+2. **Then**: Analyze systematically using all frameworks
+3. **Always**: Be honest but constructive
+4. **Never**: Give generic advice - everything must be specific
+5. **Output**: Always in markdown format, never DOCX or Word files
+
+The goal is to turn mediocre scripts into conversion machines while educating the user on WHY changes matter.
+
+---
+
+## EXAMPLE INTERACTION FLOW
+
+**User:** Here's my script for selling my $5,000 coaching program: [script]
+
+**You:** 
+1. First, review the script for obvious issues
+2. Ask: "Before I give you the full analysis, I need a few details:
+   - Who is your ideal customer?
+   - How are leads coming in?
+   - What are the top objections you hear?
+   - What's your current close rate?"
+3. OR if public product: Search for reviews, pricing, competitors
+4. Then: Deliver comprehensive analysis
+5. Ask: "Want me to rewrite this script with all improvements applied?"
+
+---
+
+## END OF PROMPT
+
+You are now ready to analyze any high-ticket sales script with expert-level precision. Wait for the user to submit their script.
+
+            </div>
+            
+            <div class="card neutral">
+                <h3>Инструкция:</h3>
+                <ol style="margin-left: 1.2rem;">
+                    <li>Включите VPN 🌐</li>
+                    <li>Перейдите в <a href="https://aistudio.google.com/" target="_blank" style="color: var(--accent);">Google AI Studio</a></li>
+                    <li>Вставьте этот промпт.</li>
+                    <li>Впишите свою идею.</li>
+                </ol>
+                <button class="btn-copy" onclick="copyPrompt()">📋 Скопировать промпт</button>
+            </div>
+        </div>
+        <p class="highlight" style="margin-top: 1.5rem; font-size: 1rem;">Это упражнение расширяет сознание. Вы поймете, что одну идею можно продать и студенту, и корпорации.</p>
+        <div class="big-number">13</div>
+    </section>
+
+    <!-- 16. HOMEWORK -->
+    <section class="slide">
+        <div class="tag">ДОМАШКА</div>
+        <h2>Задание на неделю</h2>
+        <p>Лекция закончена. Пора делать.</p>
+        <div class="card active">
+            <ul style="font-size: 1.3rem;">
+                <li>Зайдите на AppMagic или в каталог ботов.</li>
+                <li>Найдите 3 идеи, которые <b>уже</b> зарабатывают деньги.</li>
+                <li>Выберите ОДНУ, которая вам понятна (от которой не тошнит).</li>
+                <li>Прогоните её через "AI-Продажника" (предыдущий слайд).</li>
+                <li>Напишите оффер: <b>«Я делаю [ЧТО], для [КОГО], чтобы они получили [РЕЗУЛЬТАТ]».</b></li>
+            </ul>
+        </div>
+        <p class="highlight" style="margin-top: 2rem;">Встречаемся на разборе ваших офферов! 🚀</p>
+        <div class="big-number">HW</div>
+    </section>
+
+</div>
+
+<div class="progress-container"><div class="progress" id="progress"></div></div>
+
+<!-- MODAL OVERLAY -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">×</span>
+        <div id="modalText" class="post-text"></div>
+        <a id="modalSource" href="#" target="_blank" class="source-link">Читать оригинал в канале</a>
+    </div>
+</div>
+
+<script>
+    // --- POST CONTENT DATABASE ---
+    const posts = {
+        'post193': `🔥 **Самая дорогая ошибка новичка**
+
+Представь: ты идешь по улице и думаешь: "О, гениально! Такого еще никто не делал!". Ты проверяешь Google — реально нет. Ты счастлив. "Голубой океан!", думаешь ты.
+
+🛑 **СТОП.** Это ловушка.
+
+Если конкурентов нет — это очень плохой знак. В мире 8 миллиардов людей. Если этого еще нет, значит:
+1. Это уже пробовали, и оно провалилось.
+2. Рынка не существует.
+
+Создавать рынок с нуля — это задача для компаний с бюджетом в $100 млн.
+Твоя задача как пет-билдера — найти рынок, где **уже** есть деньги. Где люди **уже** платят.
+
+Не ищи уникальность. Ищи то, что можно скопировать и улучшить.`,
+
+        'post459': `📄 **$40,000 в месяц на скучных выписках**
+
+Знакомьтесь, Ангус. Он не изобретал нейросети. Он просто хотел свести дебет с кредитом.
+Его банк выдавал выписки только в PDF. А ему нужен был Excel (CSV).
+
+Он написал простую утилиту: PDF → CSV.
+Выложил в сеть.
+
+Результат через 4 года: **$40,000 в месяц**.
+На одной функции!
+
+Почему? Потому что это **БОЛЬ**. Миллионы бухгалтеров и простых людей ненавидят перебивать цифры руками. Они гуглят "pdf to excel bank statement". Ангус просто встал там, где они ищут.
+
+Урок: Скучные проблемы = Большие деньги.`,
+
+        'post307': `✂️ **Удаление фона: $10k на одной кнопке**
+
+Юра из нашего комьюнити сделал приложение. Одна функция: удалить фон с картинки.
+Казалось бы: "Зачем? Есть же Photoshop!".
+
+Да, есть. Но Photoshop стоит дорого, весит много и сложный.
+А людям нужно **быстро**.
+
+Юра просто взял одну эту функцию. Сделал её идеально.
+Итог: **10,000 активных пользователей в неделю**.
+
+Люди платят не за сложность. Люди платят за то, что ты экономишь им 10 минут ковыряния в настройках.`,
+
+        'post522': `🍌 **Разнесу вашу машину (NanoBanana)**
+
+Недавно Google выпустил редактор, который реалистично меняет фото. Люди начали делать мемы: "разбил машину друга", "сжег кухню". Пранки.
+
+На Авито тут же появились объявления: "Сделаю фото разбитой машины за 500р".
+И люди платят!
+
+Что сделал умный билдер? Запилил бота.
+Загружаешь фото -> Нейронка его "разбивает" -> Платишь копейку.
+
+Это **Рынок Дофамина**.
+Здесь не нужна логика. Здесь работает эмоция: "Ха-ха, хочу приколоться над другом".
+Чек низкий, продаж много, виральность бешеная.`,
+
+        'post305': `❤️ **Yana: Ты не одинок**
+
+Девушка страдала от депрессии. Ей не с кем было поговорить.
+Она сделала чат-бота Yana (You Are Not Alone).
+
+Простой скрипт, который спрашивает: "Как ты себя чувствуешь?" и дает советы.
+Результат? **10 миллионов скачиваний**.
+
+Почему? Потому что одиночество — это эпидемия.
+Люди боятся идти к психологу (дорого, страшно).
+Люди боятся ныть друзьям.
+А бот — он всегда рядом, в кармане, не осудит.
+
+Это гигантский рынок. Если вы можете дать человеку иллюзию заботы — вы богаты.`,
+
+        'post260': `✍️ **Электронная подпись в 1 клик**
+
+В РФ есть КриптоПро. Это стандарт.
+У них 8 миллионов пользователей.
+И рейтинг 1.8 из 5. Потому что пользоваться этим — боль и страдания.
+
+Рома из нашего комьюнити увидел это.
+И сделал расширение для браузера.
+Загрузил PDF -> Нажал кнопку -> Подписал.
+
+Всё. Никакой боли.
+Результат: **10,000 подписанных документов**.
+Бизнес платит, потому что это экономит часы работы юристов и бухгалтеров.
+
+Урок: Найди жирного, неповоротливого лидера рынка и сделай то же самое, но удобно.`,
+
+        'post199': `📹 **Loom: Продан за $975 млн**
+
+Ребята пилили свой стартап полгода. Деньги кончались. Ничего не работало.
+Они заметили, что внутри команды часто записывают видео с экрана, чтобы не созваниваться.
+
+Они выдрали эту фичу в отдельное расширение для Chrome.
+Просто запись экрана + кружочек с лицом.
+
+Итог: Продали компанию за почти **миллиард долларов**.
+Они не придумали видео. Они просто сделали его удобным для работы.`,
+
+        'post433': `🤖 **Деньги на лени (AI Обертки)**
+
+Есть ChatGPT. Он умный.
+Но большинству людей лень учиться писать промпты.
+Лень копировать текст туда-сюда.
+
+Что делают умные ребята?
+Они делают "Обертки".
+Бот "AI Юрист". Внутри — тот же ChatGPT, но с заранее зашитым промптом "Ты юрист, отвечай строго по законам РФ".
+Пользователю нужно просто нажать кнопку "Оспорить штраф".
+
+Такие боты зарабатывают **сотни тысяч рублей**.
+Вы продаете не AI. Вы продаете **интерфейс** к AI, который решает одну конкретную задачу за 5 секунд.`,
+
+        'post522avito': `💰 **Авито: Золотая жила AI услуг**
+
+Зайдите на Авито. Вбейте "Написать резюме".
+Вы увидите сотни объявлений. Цены: 500-2000 рублей.
+Как вы думаете, они пишут их сами?
+
+Нет. Умные ребята делают это через AI за 2 минуты.
+Они продают **результат** (готовое резюме), а не процесс.
+
+Вы можете сделать бота, который принимает заявку, генерирует резюме через GPT и выдает его вам. Вы только отправляете клиенту.
+Это арбитраж времени. Клиент платит за то, чтобы не разбираться в нейросетях.`,
+
+        'post374': `🚀 **Запуск за 3000 рублей ($36)**
+
+Вам не нужны миллионы на старт.
+Вам нужен Telegram.
+
+1. Делаете простого бота (на конструкторе).
+2. Находите 3 канала, где сидит ваша ЦА.
+3. Покупаете там рекламу по 1000 руб за пост.
+
+Всё. Вы получили первые переходы.
+Если оффер работает — будут продажи.
+Если нет — вы потратили всего 3000 рублей и пару вечеров.
+
+Это идеальная песочница. Ошибаться здесь дешево.`,
+
+        'post383': `⭐️ **Telegram Stars: Почему это важно**
+
+Раньше, чтобы взять деньги с клиента, нужно было:
+Открыть ИП -> Подключить кассу -> Пройти проверку -> Молиться, чтобы не забанили.
+
+Сейчас есть Stars.
+Это встроенная валюта в Telegram.
+Пользователь платит в два клика (как в AppStore).
+Вам не нужно ничего подключать на старте.
+
+Это идеальный инструмент для валидации. Сделали бота -> Поставили ценник в звездах -> Проверили, готовы ли люди платить.
+Если платят — можно заморачиваться с юрлицом.`,
+        'post531': `🧱 **Конкуренты делают плохо? Делай хорошо!**
+
+Один парень нашел нишу SEO-софта. Там уже были конкуренты.
+Но он заметил, что их софт глючит, поддержка молчит, а интерфейс из 90-х.
+
+Он просто скопировал функционал.
+Но сделал его стабильным. И отвечал клиентам в чате.
+
+Итог: **$30k за 6 месяцев**.
+Ему не нужно было придумывать идею. Ему нужно было просто не быть отстоем, как остальные.
+Иногда "просто нормально работающий продукт" — это и есть киллер-фича.`
+    };
+
+    // --- SLIDER & MODAL LOGIC ---
+    const slides = document.querySelectorAll('.slide');
+    const progress = document.getElementById('progress');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalText = document.getElementById('modalText');
+    const modalSource = document.getElementById('modalSource');
+    let currentSlide = 0;
+
+    function updateURL(index) {
+        const url = new URL(window.location);
+        url.searchParams.set('slide', index);
+        window.history.pushState({}, '', url);
+    }
+
+    function showSlide(index) {
+        if (index < 0 || index >= slides.length) return;
+        slides.forEach(s => s.classList.remove('active'));
+        slides[index].classList.add('active');
+        currentSlide = index;
+        progress.style.width = `${((index + 1) / slides.length) * 100}%`;
+        updateURL(index);
+    }
+
+    function openModal(postId, sourceUrl, channelName) {
+        const content = posts[postId] || "Текст поста не найден.";
+        const formattedContent = content.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+        modalText.innerHTML = formattedContent;
+        
+        modalSource.href = sourceUrl;
+        modalSource.textContent = `Читать оригинал в канале "${channelName}"`;
+        
+        modalOverlay.classList.add('open');
+    }
+
+    function closeModal() {
+        modalOverlay.classList.remove('open');
+    }
+
+    function copyPrompt() {
+        const promptText = document.querySelector('.prompt-box').innerText;
+        navigator.clipboard.writeText(promptText).then(() => {
+            const btn = document.querySelector('.btn-copy');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "✅ Скопировано!";
+            setTimeout(() => btn.innerHTML = originalText, 2000);
+        });
+    }
+
+    // Controls
+    window.addEventListener('load', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const slideParam = parseInt(urlParams.get('slide'));
+        showSlide(isNaN(slideParam) ? 0 : slideParam);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (modalOverlay.classList.contains('open')) {
+            if (e.key === 'Escape') closeModal();
+            return; 
+        }
+        if (e.key === 'ArrowRight' || e.key === ' ') showSlide(currentSlide + 1);
+        if (e.key === 'ArrowLeft') showSlide(currentSlide - 1);
+    });
+
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) closeModal();
+    });
+</script>
+
+</body>
+</html>
