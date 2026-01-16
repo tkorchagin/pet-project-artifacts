@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Урок 3: Разведка Данными | Тимофей Корчагин</title>
+    <title>Урок 3: Глубокое исследование ниши</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600&family=Unbounded:wght@400;700&display=swap" rel="stylesheet">
@@ -11,551 +11,759 @@
     <style>
         :root {
             --bg: #0f0f11;
-            --text-main: #f0f0f0;
-            --text-muted: #888888;
+            --text-main: #ffffff;
+            --text-muted: #c0c0c0;
             --accent: #ccff00; 
             --accent-dim: rgba(204, 255, 0, 0.1);
             --danger: #ff4d4d;
+            --danger-dim: rgba(255, 77, 77, 0.1);
             --surface: #1a1a1c;
             --surface-light: #252528;
+            --link-color: #00e5ff; 
         }
-
-        a {color: var(--accent)}
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background-color: var(--bg); color: var(--text-main); font-family: 'Manrope', sans-serif; overflow: hidden; height: 100vh; width: 100vw; }
 
         .deck { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
-        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; visibility: hidden; transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); transform: scale(0.98) translateY(20px); display: flex; flex-direction: column; justify-content: center; padding: 3rem 6rem; background: var(--bg); z-index: 1; }
+        
+        .slide { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            opacity: 0; visibility: hidden; 
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); 
+            transform: scale(0.98) translateY(20px); 
+            display: flex; flex-direction: column; justify-content: center; 
+            padding: 3rem 6rem; background: var(--bg); z-index: 1; 
+        }
         .slide.active { opacity: 1; visibility: visible; transform: scale(1) translateY(0); z-index: 10; }
 
-        h1, h2, h3 { font-family: 'Unbounded', sans-serif; text-transform: uppercase; line-height: 1.1; letter-spacing: -0.02em; }
+        h1, h2, h3, h4 { font-family: 'Unbounded', sans-serif; text-transform: uppercase; line-height: 1.1; letter-spacing: -0.02em; }
         h1 { font-size: 4rem; color: var(--accent); margin-bottom: 1rem; }
-        h2 { font-size: 3rem; margin-bottom: 1rem; color: #fff; }
-        h3 { font-size: 1.4rem; margin-bottom: 0.5rem; color: #fff; }
-        p { font-size: 1.2rem; line-height: 1.5; color: var(--text-muted); max-width: 1100px; margin-bottom: 1rem; }
+        h2 { font-size: 3rem; margin-bottom: 1.5rem; color: #fff; }
+        h3 { font-size: 1.4rem; margin-bottom: 0.8rem; color: #fff; }
+        h4 { font-size: 1rem; margin-bottom: 0.5rem; color: var(--accent); }
         
-        .highlight { color: var(--text-main); font-weight: 600; }
+        p { font-size: 1.3rem; line-height: 1.5; color: var(--text-muted); max-width: 1100px; margin-bottom: 1rem; }
+        
+        .highlight { color: #fff; font-weight: 600; }
         .accent-text { color: var(--accent); }
         .danger-text { color: var(--danger); }
-
-        .tag { display: inline-block; background: var(--surface-light); color: #fff; padding: 0.5rem 1rem; border-radius: 4px; font-family: 'Unbounded', sans-serif; font-size: 0.8rem; margin-bottom: 1.5rem; text-transform: uppercase; }
         
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 1rem; }
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem; }
-        
-        .card { background: var(--surface); padding: 1.5rem; border-radius: 16px; border: 1px solid #333; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
-        .card.active { border-color: var(--accent); }
-        .card.danger { border-color: var(--danger); }
-        
-        .big-number { font-size: 4rem; font-family: 'Unbounded', sans-serif; color: var(--surface); -webkit-text-stroke: 1px var(--surface-light); position: absolute; right: 2rem; bottom: 2rem; z-index: -1; opacity: 0.5; }
-
-        ul { list-style: none; }
-        li { font-size: 1.2rem; margin-bottom: 0.8rem; display: flex; align-items: start; color: var(--text-muted); }
-        li::before { content: "→"; color: var(--accent); margin-right: 0.8rem; font-family: 'Unbounded', sans-serif; flex-shrink: 0; }
-
-        /* Buttons & Links */
-        .btn-link {
-            background: transparent; border: 1px solid var(--accent); color: var(--accent);
-            padding: 0.5rem 1rem; font-family: 'Unbounded', sans-serif; font-size: 0.8rem;
-            cursor: pointer; border-radius: 4px; margin-top: 1rem; transition: all 0.3s;
-            text-transform: uppercase; text-decoration: none; display: inline-block;
+        /* LINKS STYLE */
+        a { 
+            color: var(--link-color); 
+            text-decoration: none; 
+            border-bottom: 1px dashed var(--link-color);
+            transition: all 0.2s; 
+            font-weight: 600;
         }
-        .btn-link:hover { background: var(--accent); color: var(--bg); }
+        a:hover { color: #fff; border-bottom-color: #fff; background: rgba(0, 229, 255, 0.1); }
+
+        .tag { display: inline-block; background: var(--surface-light); color: #fff; padding: 0.5rem 1rem; border-radius: 4px; font-family: 'Unbounded', sans-serif; font-size: 0.8rem; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px;}
+        .tag.danger { background: var(--danger-dim); color: var(--danger); }
         
-        .btn-read {
-            background: var(--surface-light); border: none; color: #fff;
-            padding: 0.5rem 1rem; font-family: 'Manrope'; font-size: 0.9rem;
-            cursor: pointer; border-radius: 4px; margin-top: 0.5rem; text-align: left;
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; margin-top: 1.5rem; width: 100%; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-top: 1.5rem; width: 100%; }
+
+        .card { 
+            background: var(--surface); 
+            padding: 2rem; 
+            border-radius: 20px; 
+            border: 1px solid #333; 
+            position: relative; 
+            display: flex; flex-direction: column;
+            transition: transform 0.2s, border-color 0.2s;
         }
-        .btn-read:hover { color: var(--accent); }
+        .card:hover { border-color: #555; }
+        .card.active { border-color: var(--accent); box-shadow: 0 0 20px rgba(204, 255, 0, 0.05); }
+        .card.danger { border-left: 4px solid var(--danger); }
+        .card p { font-size: 1.1rem; margin-bottom: 0.8rem; color: var(--text-muted); }
+        .card h3 { color: var(--accent); margin-bottom: 1rem;}
+        .card ul { margin-left: 0; padding-left: 0; }
+        
+        .big-number { font-size: 5rem; font-family: 'Unbounded', sans-serif; color: var(--surface); -webkit-text-stroke: 2px var(--surface-light); position: absolute; right: 3rem; bottom: 2rem; z-index: -1; opacity: 0.4; pointer-events: none; }
 
         .btn-copy {
             background: var(--surface-light); border: 1px solid #555; color: #fff;
-            padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-family: 'Unbounded';
-            font-size: 0.8rem; margin-top: 1rem; display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.8rem 1.5rem; border-radius: 8px; cursor: pointer; font-family: 'Unbounded';
+            font-size: 1rem; margin-top: 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s;
         }
-        .btn-copy:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-copy:hover { border-color: var(--accent); color: var(--accent); transform: scale(1.02); }
 
-        /* Prompt Box */
         .prompt-box {
             background: #000; border: 1px solid #333; padding: 1.5rem;
             border-radius: 8px; font-family: monospace; color: #0f0;
-            font-size: 0.9rem; white-space: pre-wrap; max-height: 400px; overflow-y: auto;
+            font-size: 0.8rem; white-space: pre-wrap; max-height: 400px; overflow-y: auto;
+            line-height: 1.4; border-left: 3px solid var(--accent);
         }
 
-        /* Modal */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 100;
-            display: none; align-items: center; justify-content: center;
-            backdrop-filter: blur(5px);
+        /* Lists */
+        ul.custom-list { list-style: none; padding: 0; }
+        ul.custom-list li { 
+            font-size: 1.3rem; 
+            margin-bottom: 0.8rem; 
+            display: flex; 
+            align-items: flex-start; /* Важно: выравнивание по верху */
+            color: var(--text-muted); 
+            line-height: 1.4;
         }
-        .modal-overlay.open { display: flex; }
-        
-        .modal-content {
-            background: var(--surface); border: 1px solid var(--accent);
-            width: 60%; max-width: 800px; max-height: 80vh;
-            padding: 3rem; border-radius: 20px;
-            overflow-y: auto; position: relative;
-            box-shadow: 0 0 50px rgba(204, 255, 0, 0.1);
+        ul.custom-list li b { margin-right: 0.4rem; color: #fff; } 
+        ul.custom-list li::before { 
+            content: "→"; 
+            color: var(--accent); 
+            margin-right: 1rem; 
+            font-family: 'Unbounded', sans-serif; 
+            flex-shrink: 0; /* Стрелка не сжимается */
+            font-weight: bold; 
+            margin-top: 2px; /* Чуть опустить стрелку для визуального центра */
         }
-        .close-modal { position: absolute; top: 1.5rem; right: 2rem; font-size: 2rem; cursor: pointer; color: var(--text-muted); font-family: 'Unbounded'; }
-        .close-modal:hover { color: var(--danger); }
         
-        .post-text { font-size: 1.1rem; color: var(--text-main); line-height: 1.6; white-space: pre-line; margin-bottom: 2rem; }
-        .source-link { color: var(--text-muted); font-size: 0.9rem; text-decoration: none; border-bottom: 1px dashed #555; }
-        .source-link:hover { color: var(--accent); border-color: var(--accent); }
+        ul.check-list li::before { content: "✓"; color: var(--link-color); }
+        
+        /* Исправление для текста в списках */
+        ul.custom-list li span { display: block; }
+
+        .btn-large {
+            display: inline-block;
+            background: var(--accent);
+            color: #000;
+            font-family: 'Unbounded', sans-serif;
+            font-size: 1.2rem;
+            padding: 1.2rem 2rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-transform: uppercase;
+            font-weight: 700;
+            border: none;
+        }
+        .btn-large:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(204, 255, 0, 0.3); background: #fff; color: #000; }
 
         .progress-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: #222; z-index: 100; }
         .progress { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s ease; }
+
+        .table-row { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding: 0.8rem 0; }
+        .table-row:last-child { border-bottom: none; }
+        .table-row strong { color: var(--text-main); }
+        .table-row span { color: #fff; }
+        
+        @media (max-width: 768px) {
+            .slide { padding: 2rem; overflow-y: auto; display: block; }
+            .grid, .grid-3 { grid-template-columns: 1fr; }
+            h1 { font-size: 2.5rem; }
+            h2 { font-size: 1.8rem; }
+            .big-number { display: none; }
+        }
     </style>
 </head>
 <body>
 
 <div class="deck" id="deck">
 
-    <!-- 1. INTRO -->
+    <!-- 1. ЗАСТАВКА -->
     <section class="slide active">
         <div class="tag">УРОК 3</div>
-        <h1>Разведка Боем<br>Проверка Данными 🕵️‍♂️</h1>
-        <p class="highlight" style="font-size: 1.8rem; margin-top: 1rem;">Превращаем галлюцинации в факты.</p>
-        <p style="margin-top: 1rem;">90% идей умирают, потому что они — фантазии. Сегодня мы будем проверять их цифрами.</p>
+        <h1>Исследование<br>ниши</h1>
+        <p class="highlight" style="font-size: 2rem; margin-bottom: 0.5rem; color: #fff;">Становимся экспертом рынка за один вечер.</p>
+        <p style="margin-bottom: 3rem; color: #ccc;">Выбрали идею? Теперь закапываемся в неё так глубоко, чтобы знать рынок лучше, чем 90% людей, которые там работают.</p>
+        
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #333; display: flex; align-items: center; gap: 2rem;">
+            <div>
+                <p class="highlight" style="margin-bottom: 0; font-family: 'Unbounded', sans-serif; font-size: 1rem; color: #fff;">Тимофей Корчагин</p>
+                <p style="margin-bottom: 0; color: var(--accent); font-family: 'Unbounded', sans-serif; font-size: 0.8rem;">@tkorchagin</p>
+            </div>
+            <div style="margin-left: auto; text-align: right;">
+                <p style="font-size: 0.8rem; letter-spacing: 0.2em; color: var(--text-muted); text-transform: uppercase;">MONEY MAKER<br>MODULE</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. РЕКАП -->
+    <section class="slide">
+        <div class="tag">ЧТО МЫ СДЕЛАЛИ 🔙</div>
+        <h2>Рекап прошлого урока</h2>
+        <ul class="custom-list" style="margin-top: 2rem;">
+            <li><span><b>Прокачали бицуху</b> — научились быстро генерить идеи и видеть деньги.</span></li>
+            <li><span><b>Нашли денежные потоки</b> — поняли, за что люди РЕАЛЬНО платят.</span></li>
+            <li><span><b>Выбрали ОДНУ идею</b> — если у тебя их 5, ты не выбрал. Ты просто взял всё подряд.</span></li>
+        </ul>
+        <div class="card active" style="margin-top: 2rem;">
+            <p style="margin: 0; color: var(--accent);">🎯 Критерий фокуса: Ты от чего-то отказался. Мы берем одну идею и бьем в точку.</p>
+        </div>
         <div class="big-number">01</div>
     </section>
 
-    <!-- 2. PLAN -->
+    <!-- 3. ПЛАН УРОКА -->
     <section class="slide">
-        <div class="tag">ПЛАН УРОКА</div>
-        <h2>Что сегодня делаем?</h2>
+        <div class="tag">МАРШРУТ 🗺️</div>
+        <h2>План захвата мира</h2>
         <div class="grid">
             <div class="card active">
-                <ul>
-                    <li><b>Ошибки:</b> Почему "для всех" = "ни для кого".</li>
-                    <li><b>Инструменты:</b> AppMagic, Wordstat, Ads Library.</li>
-                    <li><b>Ключи к деньгам:</b> AppFollow и негативные отзывы.</li>
-                    <li><b>AI-Аналитик:</b> Промпт для Claude.</li>
-                    <li><b>Артефакт:</b> Заполненная таблица валидации.</li>
+                <h3>Сегодня:</h3>
+                <ul class="custom-list">
+                    <li><span>1. Проверяем спрос цифрами (Wordstat, Trends).</span></li>
+                    <li><span>2. Лезем в карман конкурентам (AppMagic).</span></li>
+                    <li><span>3. Проходим путь юзера и скриним всё в Figma.</span></li>
+                    <li><span>4. Ищем боли в плохих отзывах.</span></li>
                 </ul>
             </div>
-            <div class="card" style="justify-content: center; align-items: center; text-align: center;">
-                <h3 class="accent-text" style="font-size: 3rem;">📝</h3>
-                <p class="highlight">Вам понадобится ручка и блокнот для конспекта.</p>
+            <div class="card" style="opacity: 0.6; border-style: dashed;">
+                <h3>На следующем уроке:</h3>
+                <p style="color: #fff;"><b>Упаковка.</b> Как сделать оффер, который невозможно проигнорировать. ICP, хуки, тексты, paywall.</p>
             </div>
         </div>
         <div class="big-number">02</div>
     </section>
 
-    <!-- 3. MAIN MISTAKE -->
+    <!-- 4. ФОКУС -->
     <section class="slide">
-        <div class="tag danger">ГЛАВНАЯ ОШИБКА</div>
-        <h2>Пытаться обнять необъятное</h2>
+        <div class="tag danger">СУЖЕНИЕ ✂️</div>
+        <h2>Для всех = ни для кого</h2>
+        <p style="color: #ccc;">Наша цель — найти такую узкую нишу, где ты можешь быть лучшим.</p>
         
         <div class="grid" style="margin-top: 2rem;">
             <div class="card danger">
                 <h3>❌ Плохо:</h3>
-                <p>«Приложение с гороскопами для всех женщин».</p>
-                <p style="font-size: 0.9rem; color: var(--text-muted);">Конкуренция с Mail.ru и огромные бюджеты.</p>
+                <p style="color: #fff;"><b>"Гороскоп для женщин"</b></p>
+                <p style="color: #ccc;">Ты конкурируешь с Mail.ru, Nebula и тысячами приложений. Бюджеты миллионные.</p>
             </div>
             <div class="card active">
                 <h3>✅ Хорошо:</h3>
-                <p>«Таро-бот для женщин в разводе, которые хотят узнать, вернется ли муж».</p>
-                <p style="font-size: 0.9rem; color: var(--accent);">Узкая боль. Понятно, где искать. Понятно, что продавать.</p>
+                <p style="color: #fff;"><b>"Астро-совет для женщины 30+, которая в 2 ночи не может уснуть из-за ссоры"</b></p>
+                <p style="color: #ccc;">Ты единственный, кто решает ЭТУ боль. Конверсия будет бешеной.</p>
             </div>
         </div>
         <div class="big-number">03</div>
     </section>
 
-    <!-- 4. RULE OF 1 -->
+    <!-- 5. ИНСТРУМЕНТЫ -->
     <section class="slide">
-        <div class="tag">ФОРМУЛА</div>
-        <h2>Правило «Ультра-Узкой Ниши»</h2>
-        <p class="highlight">Чтобы победить гиганта, нужно быть иглой, а не молотком.</p>
-        
+        <div class="tag">ТВОЙ НАБОР РАЗВЕДЧИКА 🛠️</div>
+        <h2>Инструменты исследования</h2>
         <div class="grid">
-            <div class="card active">
-                <ol style="font-size: 1.4rem; line-height: 1.8;">
-                    <li><b>1 ICP (Ideal Customer Profile)</b> (Женщины 35+, кризис).</li>
-                    <li><b>1 Боль</b> (Тревога за будущее).</li>
-                    <li><b>1 Решение</b> (Таро-расклад в Telegram).</li>
-                    <li><b>1 Канал</b> (Посевы в пабликах "Психология").</li>
-                </ol>
+            <div class="card">
+                <h4>📊 Спрос и Тренды</h4>
+                <div class="table-row">
+                    <span>Yandex Wordstat</span>
+                    <a href="https://wordstat.yandex.ru" target="_blank">wordstat.yandex.ru</a>
+                </div>
+                <div class="table-row">
+                    <span>Google Trends</span>
+                    <a href="https://trends.google.com" target="_blank">trends.google.com</a>
+                </div>
             </div>
-            <div class="card neutral">
-                <p>Storemapper. 1 аудитория — владельцы Shopify. 1 боль — показать магазины на карте. Итог: $25k/мес без маркетинга.</p>
-                <button class="btn-read" onclick="openModal('post443', 'https://t.me/your_pet_project/443', 'Твой пет-проект')">Читать кейс Storemapper</button>
+            
+            <div class="card">
+                <h4>📱 Мобильные приложения</h4>
+                <div class="table-row">
+                    <span>AppMagic (Выручка)</span>
+                    <a href="https://appmagic.rocks" target="_blank">appmagic.rocks</a>
+                </div>
+                <div class="table-row">
+                    <span>AppFollow (Ключи)</span>
+                    <a href="https://appfollow.io" target="_blank">appfollow.io</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <h4>💻 Веб-сервисы</h4>
+                <div class="table-row">
+                    <span>Metrica.guru (Трафик)</span>
+                    <a href="https://metrica.guru" target="_blank">metrica.guru</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <h4>🤖 Telegram</h4>
+                <div class="table-row">
+                    <span>TG Radar Bot</span>
+                    <a href="https://t.me/radar_tg_bot" target="_blank">@radar_tg_bot</a>
+                </div>
             </div>
         </div>
         <div class="big-number">04</div>
     </section>
 
-    <!-- 5. TOOLS INTRO -->
+    <!-- 6. WORDSTAT -->
     <section class="slide">
-        <div class="tag">АРСЕНАЛ</div>
-        <h2>Инструменты Разведчика 🛠</h2>
-        <p>Мы не гадаем. Мы смотрим факты.</p>
-        <div class="grid-3">
-            <div class="card active">
-                <h3 class="accent-text">1. Деньги</h3>
-                <p>AppMagic</p>
-                <p style="font-size: 0.9rem;">Сколько зарабатывают конкуренты?</p>
-            </div>
-            <div class="card active">
-                <h3 class="accent-text">2. Спрос</h3>
-                <p>Yandex Wordstat</p>
-                <p style="font-size: 0.9rem;">Ищут ли это люди?</p>
-            </div>
-            <div class="card active">
-                <h3 class="accent-text">3. Реклама</h3>
-                <p>FB Ads / TG Ads</p>
-                <p style="font-size: 0.9rem;">Как они это продают?</p>
+        <div class="tag">СПРОС 📈</div>
+        <h2>Yandex Wordstat</h2>
+        <p class="highlight" style="color: #fff;">Сколько людей ищут решение прямо сейчас?</p>
+        
+        <div class="card active" style="margin-bottom: 2rem;">
+            <h3>Что делать:</h3>
+            <ul class="custom-list" style="margin-top: 1rem;">
+                <li><span>Вбей запросы из своей ниши (например: "как составить договор").</span></li>
+                <li><span>Смотри <b style="color:#fff">Общий объем</b> — есть ли там вообще люди?</span></li>
+                <li><span>Смотри <b style="color:#fff">Похожие запросы</b> — это идеи для твоих фич.</span></li>
+                <li><span>Смотри <b style="color:#fff">История запросов</b> — нет ли сезонного спада?</span></li>
+            </ul>
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #333;">
+                <p style="color: #fff;">Много запросов = Есть спрос, но есть конкуренция.<br>
+                Мало запросов = Либо нет рынка, либо ты нашел "голубой океан".</p>
+                <a href="https://wordstat.yandex.ru" target="_blank" class="btn-copy" style="text-decoration: none; width: fit-content;">🚀 Открыть Wordstat</a>
             </div>
         </div>
         <div class="big-number">05</div>
     </section>
 
-    <!-- 6. APPMAGIC -->
+    <!-- 7. GOOGLE TRENDS -->
     <section class="slide">
-        <div class="tag">ДЕНЬГИ</div>
-        <h2>AppMagic: Проверка Выручки</h2>
-        <p>Если у конкурента $0 — бегите. Если $500k — оставайтесь.</p>
+        <div class="tag">ТРЕНДЫ 📊</div>
+        <h2>Google Trends</h2>
+        <p class="highlight" style="color: #fff;">Рынок растёт или умирает?</p>
         
-        <div class="card active" style="margin-top: 1rem;">
-            <h3>Алгоритм:</h3>
-            <ol>
-                <li>Заходим на <a href="https://appmagic.rocks/" target="_blank" style="color: var(--accent);">AppMagic.rocks</a>.</li>
-                <li>Вбиваем ключевое слово (например, "Tarot").</li>
-                <li>Смотрим <b>Revenue</b> (Выручка).</li>
-                <li>Если видим цифры >$5k — ниша живая.</li>
-            </ol>
+        <div class="grid">
+            <div class="card active">
+                <h3>📈 Тренд растёт</h3>
+                <p style="color: #ccc;">Отлично. Рынок развивается, запрыгивай в вагон.</p>
+            </div>
+            <div class="card danger">
+                <h3>📉 Тренд падает</h3>
+                <p style="color: #ccc;">Осторожно. Возможно, тема уже никому не интересна.</p>
+            </div>
         </div>
-        <button class="btn-read" style="margin-top: 1rem;" onclick="openModal('post172', 'https://t.me/its_capitan/172', 'Короче, Капитан')">Кейс: ЭЦП (Копируй крупных)</button>
+        
+        <div class="card" style="margin-top: 2rem; border-style: dashed;">
+            <p style="color: #fff;"><b class="accent-text">💡 Лайфхак:</b> Видишь резкий пик (спайк) на графике? Узнай причину. Может быть, вышла новость или вирусный ролик, который можно использовать в креативах.</p>
+            <a href="https://trends.google.com" target="_blank">Открыть Google Trends →</a>
+        </div>
         <div class="big-number">06</div>
     </section>
 
-    <!-- 7. WORDSTAT -->
+    <!-- 8. MONEY ANALYSIS -->
     <section class="slide">
-        <div class="tag">СПРОС</div>
-        <h2>Wordstat: Что ищут люди?</h2>
-        <p>Нам нужны не фантазии, а поисковые запросы.</p>
-        
-        <div class="card active" style="margin-top: 1rem;">
-            <h3>Пример с Таро:</h3>
-            <ul style="margin-bottom: 1.5rem;">
-                <li>"Таро онлайн" — 1.5 млн показов (Много, но широко).</li>
-                <li>"Таро расклад на измену" — 50 тыс. показов (Вот это наша ниша!).</li>
-            </ul>
-            <a href="https://wordstat.yandex.ru/" target="_blank" class="btn-link">Открыть Wordstat</a>
+        <div class="tag">ДЕНЬГИ 💰</div>
+        <h2>Анализ выручки конкурентов</h2>
+        <p class="highlight" style="color: #fff;">Не верь словам, верь цифрам. Смотрим в кошелёк конкурентам.</p>
+
+        <div class="grid">
+            <div class="card active">
+                <h3>📱 AppMagic</h3>
+                <p style="color: #ccc;">Для мобильных приложений.</p>
+                <ul class="custom-list">
+                    <li><span>Перейди во вкладку <b>Competitors</b> (Конкуренты).</span></li>
+                    <li><span>Увидишь, кто реально зарабатывает в нише.</span></li>
+                    <li><span><b>Смотри скриншоты в сторах:</b> там прямо подписаны штуки, за которые платят.</span></li>
+                </ul>
+                <a href="https://appmagic.rocks" target="_blank">Открыть AppMagic →</a>
+            </div>
+            <div class="card active">
+                <h3>💻 Metrica.guru</h3>
+                <p style="color: #ccc;">Для веб-сервисов (бесплатно).</p>
+                <ul class="custom-list">
+                    <li><span>Вбей домен конкурента.</span></li>
+                    <li><span>Смотри трафик за длинный период.</span></li>
+                    <li><span>Откуда приходят люди?</span></li>
+                </ul>
+                <a href="https://metrica.guru" target="_blank">Открыть Metrica.guru →</a>
+            </div>
         </div>
-        <button class="btn-read" style="margin-top: 1rem;" onclick="openModal('post256', 'https://t.me/dashich_begi/256', 'Дашич, беги')">Кейс: История копирования (спрос в поиске)</button>
         <div class="big-number">07</div>
     </section>
 
-    <!-- 8. ADS LIBRARY -->
+    <!-- 9. MYSTERY SHOPPER -->
     <section class="slide">
-        <div class="tag">РЕКЛАМА</div>
-        <h2>Ads Library: На что они давят?</h2>
-        <p class="highlight">Если реклама крутится дольше месяца — она приносит деньги.</p>
-        
-        <div class="card neutral" style="margin-top: 1.5rem;">
-            <h3>Пример Таро:</h3>
-            <p>Они не пишут: "У нас красивые карты".</p>
-            <p class="accent-text">Они пишут: "Узнай, что он думает о тебе прямо сейчас".</p>
-            <p>Мы просто берем этот оффер.</p>
-        </div>
-        <div class="grid" style="margin-top: 1rem;">
-            <a href="https://www.facebook.com/ads/library/" target="_blank" class="btn-link">FB Ads Library</a>
-            <a href="https://telegramads.com/" target="_blank" class="btn-link">Telegram Ads</a>
+        <div class="tag">ТАЙНЫЙ ПОКУПАТЕЛЬ 🕵️</div>
+        <h2>Пройди путь пользователя</h2>
+        <p style="color: #ccc;">Скачай 3 главных конкурента. Не просто потыкай, а исследуй.</p>
+
+        <div class="grid-3">
+            <div class="card active">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📸</div>
+                <h3>1. Онбординг</h3>
+                <p style="color: #ccc;">Что они обещают? Как продают мечту? Скринь каждый экран.</p>
+            </div>
+            <div class="card active">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">💸</div>
+                <h3>2. Paywall</h3>
+                <p style="color: #ccc;">За что просят деньги? Какая цена? Подписка или разовая? Какие фичи закрыты?</p>
+            </div>
+            <div class="card active">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📁</div>
+                <h3>3. Всё в Figma</h3>
+                <p style="color: #ccc;">Все скрины — на одну доску. Это твой учебник.</p>
+            </div>
         </div>
         <div class="big-number">08</div>
     </section>
 
-    <!-- 9. APPFOLLOW (NEW) -->
+    <!-- 10. BAD REVIEWS -->
     <section class="slide">
-        <div class="tag">БОЛИ</div>
-        <h2>AppFollow: О чем они молчат?</h2>
-        <p>Мы смотрим ключевые слова, по которым приложение в топе.</p>
+        <div class="tag">ЗОЛОТАЯ ЖИЛА ⭐</div>
+        <h2>Читаем плохие отзывы</h2>
+        <p class="highlight" style="color: #fff;">Негатив = Твой Бэклог (список задач).</p>
         
-        <div class="card active" style="margin-top: 1rem;">
-            <h3>Инсайт:</h3>
-            <p>Если приложение Таро в топе по ключу "гадание на измену" — значит, это главная боль их аудитории. Вам не нужно гадать, вам нужно делать бота "Проверка на измену".</p>
-            <a href="https://appfollow.io/" target="_blank" class="btn-link">Открыть AppFollow</a>
+        <div class="card active" style="margin-bottom: 1.5rem;">
+            <h3>Что делать:</h3>
+            <p style="color: #fff; margin-bottom: 1rem;">Открой <b>App Store</b> или <b>Google Play</b> и читай отзывы на 1-2 звезды.</p>
+            <ul class="custom-list" style="margin-top: 1rem;">
+                <li><span><b class="accent-text">"Хотел бы, чтобы было..."</b> — Готовая идея новой фичи.</span></li>
+                <li><span><b class="danger-text">"Раздражает, что..."</b> — Что тебе нужно убрать.</span></li>
+                <li><span><b class="text-muted" style="color:#aaa">"Перестал пользоваться, потому что..."</b> — Критическая проблема.</span></li>
+            </ul>
         </div>
+        <p class="accent-text">Каждая повторяющаяся жалоба = твоя возможность сделать лучше и забрать их клиентов.</p>
         <div class="big-number">09</div>
     </section>
 
-    <!-- 10. REVIEWS (NEW) -->
+    <!-- 11. SOURCES FOR INSIGHTS -->
     <section class="slide">
-        <div class="tag">НЕГАТИВ</div>
-        <h2>Читайте Плохие Отзывы ⭐️</h2>
-        <p class="highlight">Ваш список фич — это жалобы пользователей конкурентов.</p>
-        
-        <div class="grid">
-            <div class="card danger">
-                <h3>1 звезда:</h3>
-                <p>"Постоянно вылетает реклама!"</p>
-                <p>"Слишком дорого для одной функции!"</p>
-                <p>"Нет темной темы!"</p>
+        <div class="tag">ГЛУБИНА 📚</div>
+        <h2>Где еще искать инсайты?</h2>
+        <p style="color: #ccc;">Используй те же источники, но с фокусом на: <br><b>"КАК они выходили на рынок?"</b></p>
+
+        <div class="grid-3">
+            <div class="card">
+                <h3>Indie Hackers</h3>
+                <p style="color: #ccc;">Ищи истории ("Interviews"). Как строили? Какие каналы сработали первыми? Ошибки?</p>
+                <a href="https://indiehackers.com/stories" target="_blank">Читать истории →</a>
             </div>
-            <div class="card active">
-                <h3>Ваше решение:</h3>
-                <p>Сделать без рекламы.</p>
-                <p>Сделать дешевле.</p>
-                <p>Сделать с темной темой.</p>
+            <div class="card">
+                <h3>TrustMRR</h3>
+                <p style="color: #ccc;">Смотри на ниши, которые растут. Какой MRR считается нормой?</p>
+                <a href="https://trustmrr.com" target="_blank">Смотреть данные →</a>
+            </div>
+            <div class="card">
+                <h3>Flippa</h3>
+                <p style="color: #ccc;">За сколько продают готовые бизнесы в твоей нише? Это покажет реальную оценку рынка.</p>
+                <a href="https://flippa.com" target="_blank">Искать продажи →</a>
             </div>
         </div>
-        <button class="btn-read" onclick="openModal('post531', 'https://t.me/your_pet_project/531', 'Твой пет-проект')">Кейс: Сделал хорошо то, что у других работало плохо</button>
         <div class="big-number">10</div>
     </section>
 
-    <!-- 11. AI ANALYST -->
+    <!-- 12. FIGMA -->
     <section class="slide">
-        <div class="tag">АВТОМАТИЗАЦИЯ</div>
-        <h2>Ваш Аналитик — Claude 🤖</h2>
-        <div class="grid" style="grid-template-columns: 1fr 1.5fr;">
-            <div>
-                <p>Мы используем <b>Claude 3.5 Sonnet</b>, потому что он умеет искать свежие факты, а не галлюцинировать.</p>
-                <p style="margin-top: 1rem;">Скопируйте этот промпт и вставьте в чат.</p>
-                <button class="btn-copy" onclick="copyPrompt()">📋 Скопировать</button>
-            </div>
-            <div class="prompt-box">
-Ты — циничный бизнес-аналитик и инвестор. 
-Я хочу проверить идею: [ОПИШИ ИДЕЮ, например: Таро-бот в Telegram].
-
-Твоя задача — провести жесткую разведку (используй поиск):
-1. Найди 3-5 прямых конкурентов (приложения или боты).
-2. Оцени их примерную выручку или популярность (по отзывам/скачиваниям).
-3. Прочитай негативные отзывы (1-2 звезды). На что жалуются люди? (Дорого? Сложно? Глючит?).
-4. Сформулируй 3 "дыры" в рынке, которые я могу закрыть.
-5. Опиши ICP (Ideal Customer Profile): Кто этот человек, у которого болит сильнее всего? Опиши ситуацию потребления.
-
-Будь краток и опирайся на факты.
-            </div>
+        <div class="tag">СИСТЕМАТИЗАЦИЯ 📁</div>
+        <h2>Всё в Figma</h2>
+        <h3 class="danger-text">Нет скрина = Не было</h3>
+        <p style="color: #ccc;">Через неделю ты забудешь 90% найденного. Figma — твоя внешняя память.</p>
+        
+        <div class="card active">
+            <h3>Что должно лежать на доске:</h3>
+            <ul class="check-list custom-list">
+                <li><span>Скрины онбординга конкурентов (пошагово).</span></li>
+                <li><span>Скрины всех Paywall (экранов оплаты).</span></li>
+                <li><span>Скрины интересных фич и интерфейсов.</span></li>
+                <li><span>Цитаты из гневных отзывов.</span></li>
+                <li><span>Цифры выручки (скрины с AppMagic).</span></li>
+            </ul>
         </div>
         <div class="big-number">11</div>
     </section>
 
-    <!-- 12. ICP EXPLAINED -->
+    <!-- 13. FUNNELS LIBRARY -->
     <section class="slide">
-        <div class="tag">КЛИЕНТ</div>
-        <h2>Кто такой ICP?</h2>
-        <p><b>Ideal Customer Profile</b> — это тот, кому вы продаете.</p>
-        <div class="card active" style="margin-top: 1.5rem;">
-            <p>❌ <b>Плохо:</b> Женщины 18-45 лет, РФ. (Это половина страны).</p>
-            <p>✅ <b>Хорошо:</b> Женщины в декрете, которые ищут подработку, но боятся, что их обманут.</p>
+        <div class="tag">ШПАРГАЛКА 📚</div>
+        <h2>Библиотека воронок</h2>
+        <p class="highlight" style="color: #fff;">Не изобретай велосипед. Посмотри, как это делают топы.</p>
+        
+        <div class="card active" style="text-align: center; padding: 3rem;">
+            <h3 style="font-size: 2rem; color: var(--accent);">311 Web-to-App воронок</h3>
+            <p style="margin: 1rem auto; color: #fff;">Огромная база. Обрати внимание на формулировки на первом экране и что конкретно продают в конце.</p>
+            <a href="https://docs.google.com/spreadsheets/d/1gguwoqz6HQgkTvLwdEZux-r8Q2_fNej_Gnj5Q3nNMI4/edit?gid=0#gid=0" target="_blank" class="btn-large">
+                🔗 Открыть таблицу воронок
+            </a>
         </div>
-        <button class="btn-read" onclick="openModal('post456', 'https://t.me/firstanalyticsguide/456', 'First Analytics Guide')">Как выбор клиента определяет успех</button>
         <div class="big-number">12</div>
     </section>
 
-    <!-- 13. TABLE ARTIFACT -->
+    <!-- 14. AI PROMPT -->
     <section class="slide">
-        <div class="tag">АРТЕФАКТ</div>
-        <h2>Таблица Валидации</h2>
-        <p>Мы не держим идеи в голове. Мы заполняем Google-таблицу.</p>
-        <a href="https://docs.google.com/spreadsheets/d/19VO_YG3gpXGBmBTzuLBIrM9kkseKvqfUrcjdjqMn1qM/edit?pli=1&gid=1037329680#gid=1037329680" target="_blank" class="btn-link" style="font-size: 1.2rem;">Открыть Таблицу</a>
-        <div class="grid-3" style="margin-top: 2rem;">
+        <div class="tag">AI ПОМОЩНИК 🤖</div>
+        <h2>Claude сделает рисерч за пару минут</h2>
+        <p style="color: #ccc;">Когда пройдешься руками — запусти этот промпт. Вставь свою идею, и он выдаст глубокую аналитику.</p>
+        
+        <div class="grid" style="align-items: start;">
+            <!-- ID added to inject prompt via JS -->
+            <div id="promptDisplay" class="prompt-box"></div>
+            
             <div class="card active">
-                <h3>1. Идеи</h3>
-                <p>Список из 5 вариантов (чтобы не зацикливаться).</p>
-            </div>
-            <div class="card active">
-                <h3>2. Конкретика</h3>
-                <p>Формула ICP и Боль.</p>
-            </div>
-            <div class="card active">
-                <h3>3. Рынок</h3>
-                <p>Конкуренты, Цены, Скриншоты денег.</p>
+                <h3>Инструкция:</h3>
+                <ol style="margin-left: 1.2rem; color: #fff;">
+                    <li>Скопируй промпт.</li>
+                    <li>Вставь в <a href="https://claude.ai" target="_blank">Claude.ai</a> или <a href="https://chatgpt.com" target="_blank">ChatGPT</a>.</li>
+                    <li>В конце допиши свою идею.</li>
+                    <li>Сохрани ответ — это твоя стратегия.</li>
+                </ol>
+                <button class="btn-copy" onclick="copyPrompt()">📋 Скопировать промпт</button>
             </div>
         </div>
         <div class="big-number">13</div>
     </section>
 
-    <!-- 14. TABLE BLOCK 1 -->
+    <!-- 15. CHECKLIST -->
     <section class="slide">
-        <div class="tag">БЛОК 1</div>
-        <h2>Поиск Идеи</h2>
-        <div class="card active">
-            <h3>Поля таблицы:</h3>
-            <ul>
-                <li><b>Основная идея:</b> Таро-бот.</li>
-                <li><b>5 запасных идей:</b> (Возьмите из прошлого урока или придумайте).</li>
-                <li><b>Почему выбрал эту?</b> (Не "потому что легко", а "потому что драйвит / бесит проблема / вижу деньги").</li>
-            </ul>
+        <div class="tag">ЧЕК-ЛИСТ ✅</div>
+        <h2>Проверь себя</h2>
+        <p style="color: #ccc;">Если чего-то нет — не переходи к упаковке. Вернись и доделай.</p>
+
+        <div class="grid">
+            <div class="card active">
+                <ul class="check-list custom-list">
+                    <li><span>Знаю объем рынка (Wordstat).</span></li>
+                    <li><span>Знаю выручку топ-конкурентов.</span></li>
+                    <li><span>Прошел онбординг 3 конкурентов.</span></li>
+                    <li><span>Прочитал минимум 20 плохих отзывов.</span></li>
+                    <li><span>Нашел 3 главные боли (жалобы).</span></li>
+                    <li><span><b>Все скрины лежат в Figma.</b></span></li>
+                </ul>
+            </div>
+            
+            <div class="card active" style="justify-content: center; align-items: center; text-align: center;">
+                <h3>Домашка в таблице</h3>
+                <p style="color: #fff;">Заполняй вкладку "Разведка".</p>
+                <a href="https://docs.google.com/spreadsheets/d/19VO_YG3gpXGBmBTzuLBIrM9kkseKvqfUrcjdjqMn1qM/edit?pli=1&gid=1037329680#gid=1037329680" target="_blank" class="btn-large">
+                    📝 Открыть таблицу
+                </a>
+            </div>
         </div>
-        <p class="highlight" style="margin-top: 1.5rem;">Важно иметь запасные варианты. Не влюбляйтесь в одну идею.</p>
         <div class="big-number">14</div>
-    </section>
-
-    <!-- 15. TABLE BLOCK 2 -->
-    <section class="slide">
-        <div class="tag">БЛОК 2</div>
-        <h2>Конкретика (ICP)</h2>
-        <div class="card active">
-            <h3>Поля таблицы:</h3>
-            <ul>
-                <li><b>ICP:</b> Вставляем формулу с прошлого слайда.</li>
-                <li><b>Проблема №1:</b> Что болит сильнее всего?</li>
-                <li><b>Как решают сейчас?</b> (Конкуренты, Excel, Блокнот).</li>
-                <li><b>Твое преимущество:</b> (Быстрее, Дешевле, В Телеграме, Без VPN).</li>
-            </ul>
-        </div>
-        <div class="big-number">15</div>
-    </section>
-
-    <!-- 16. TABLE BLOCK 3 -->
-    <section class="slide">
-        <div class="tag">БЛОК 3</div>
-        <h2>Рынок и Деньги</h2>
-        <div class="card active">
-            <h3>Поля таблицы:</h3>
-            <ul>
-                <li><b>Список конкурентов:</b> Минимум 5 ссылок.</li>
-                <li><b>Доказательства денег:</b> Скриншоты из AppMagic.</li>
-                <li><b>Средний чек:</b> Сколько они берут?</li>
-                <li><b>Реклама:</b> Скриншоты креативов (Ads Lib).</li>
-            </ul>
-        </div>
-        <div class="big-number">16</div>
-    </section>
-
-    <!-- 17. RULE OF 5 -->
-    <section class="slide">
-        <div class="tag">ПРАВИЛО</div>
-        <h2>Правило Пяти Конкурентов</h2>
-        <p class="highlight">Если вы не нашли 5 конкурентов — вы плохо искали или рынка нет.</p>
-        
-        <div class="card neutral" style="margin-top: 1.5rem;">
-            <p>Конкуренты — это ваши учителя. Они уже потратили деньги на тесты.</p>
-            <p>Мы просто смотрим, что у них работает, и делаем так же.</p>
-        </div>
-        <button class="btn-read" onclick="openModal('post539', 'https://t.me/your_pet_project/539', 'Твой пет-проект')">Почему конкуренция — это хорошо</button>
-        <div class="big-number">17</div>
-    </section>
-
-    <!-- 18. FINAL TASK -->
-    <section class="slide">
-        <div class="tag">ФИНАЛ</div>
-        <h2>Задание на неделю</h2>
-        <div class="card active">
-            <ol style="font-size: 1.4rem; line-height: 1.8;">
-                <li>Скопировать <a href="https://docs.google.com/spreadsheets/d/19VO_YG3gpXGBmBTzuLBIrM9kkseKvqfUrcjdjqMn1qM/edit?pli=1&gid=1037329680#gid=1037329680" target="_blank" ">Таблицу</a> себе.</li>
-                <li>Выбрать <b>1 идею</b> для проработки (и 5 запасных списком).</li>
-                <li>Прогнать идею через <b>Claude</b> (Промпт) и инструменты (Wordstat, AppMagic, AppFollow).</li>
-                <li>Заполнить все поля во вкладке "Разведка Идеи".</li>
-                <li>Прислать ссылку на таблицу в чат.</li>
-            </ol>
-        </div>
-        <p class="highlight" style="margin-top: 2rem;">Если цифры сойдутся — начнем строить. 🚀</p>
-        <div class="big-number">HW</div>
     </section>
 
 </div>
 
 <div class="progress-container"><div class="progress" id="progress"></div></div>
 
-<!-- MODAL OVERLAY -->
-<div class="modal-overlay" id="modalOverlay">
-    <div class="modal-content">
-        <span class="close-modal" onclick="closeModal()">×</span>
-        <div id="modalText" class="post-text"></div>
-        <a id="modalSource" href="#" target="_blank" class="source-link">Читать оригинал в канале</a>
-    </div>
-</div>
-
 <script>
-    // --- POST CONTENT DATABASE (FIXED) ---
-    const posts = {
-        'post443': `🗺 **$25,000/мес на карте магазинов**
+    // --- PROMPT DATA ---
+    const PROMPT_TEXT = `# ULTRA-DETAILED MOBILE APP MARKET ANALYSIS PROMPT
 
-Чувак заметил, что владельцы магазинов на Shopify постоянно гуглят "как добавить карту магазинов на сайт".
-Существующие решения были сложными и дорогими.
+## OBJECTIVE
+Conduct a comprehensive, data-driven analysis of a mobile app market segment to identify the ideal customer profile (ICP), uncover deep user pain points, validate market opportunities, and provide actionable strategic insights for product development and market entry.
 
-Он сделал Storemapper. Простой виджет.
-Никакого маркетинга. Только SEO по запросу "shopify store locator".
+## CORE RESEARCH METHODOLOGY
 
-Итог: **$25,000 MRR (ежемесячно)**.
-Он просто встал там, где люди уже искали решение.`,
+### PHASE 1: FUNDAMENTAL PAIN POINT DISCOVERY
+**Primary Focus: Identify the "Teleportation Desire" - the core impossible wish users have**
 
-        'post172': `✍️ **Копируй крупных, делай проще**
+1. **Deep Pain Point Research**
+   - Search for user reviews on App Store and Google Play (minimum 500 reviews across top 10 apps)
+   - Analyze Reddit discussions in relevant subreddits (r/gaming, r/apps, specific game/app communities)
+   - Search Twitter/X for user complaints using keywords: "[app category] frustrating", "[app category] annoying", "hate when [app category]"
+   - Find customer support tickets and FAQ sections from major apps
+   - Look for user-generated content on TikTok, YouTube shorts showing user frustrations
 
-Когда мы что-то запускаем, мы не пытаемся поразить фантазией.
-1. Смотрим на рынок.
-2. Берем крупного игрока.
-3. И делаем то же самое — только максимально ПРОЩЕ. В идеале — 1 кнопкой.
+2. **Categorize Pain Points by Severity**
+   - **Interaction-level pains** (UI/UX issues, bugs, crashes)
+   - **Journey-level pains** (onboarding, monetization friction, feature discovery)
+   - **Relationship-level pains** (trust issues, unmet expectations, value perception)
+   - **Productivity pains** (slow loading, app crashes, data loss)
+   - **Financial pains** (unexpected costs, poor value, payment friction)
+   - **Support pains** (no help when needed, poor customer service)
 
-Пример: Рома.
-Посмотрел на рынок ЭЦП (электронных подписей).
-Там есть гигант КриптоПро с 7 млн пользователей. Но пользоваться им — это танцы с бубном.
-Рома сделал расширение: сфоткал документ -> подписал в 1 клик.
+3. **Unspoken Desires Analysis**
+   - What is the "impossible" thing users wish they could do? (Like teleportation for transportation apps)
+   - What would make users say "this is exactly what I've been waiting for"?
+   - What do users complain about that competitors haven't solved?
 
-Это ВАУ-эффект. Вы берете готовый рынок и просто убираете боль использования.`,
+### PHASE 2: IDEAL CUSTOMER PROFILE (ICP) DEVELOPMENT
 
-        'post256': `🕺 **Находим существующий спрос (Кейс: История копирования)**
+4. **Demographic Research**
+   - Age ranges and generational preferences
+   - Geographic distribution (focus on top 5 countries)
+   - Income levels and spending behavior
+   - Device preferences (iOS vs Android usage patterns)
+   - Daily app usage patterns and session duration
 
-Пример из нашего комьюнити (Шамиль).
-Он не выдумывал идею. Он посмотрел в поиск и увидел: люди ищут "история копирования" (буфер обмена).
+5. **Psychographic Profiling**
+   - Motivations for using these apps
+   - Lifestyle patterns and daily routines
+   - Values and priorities
+   - Tech adoption patterns
+   - Social media behavior
 
-Сделал простую прилу: нажал кнопку -> увидел, что копировал 5 минут назад.
-Итог: Первые 70 пользователей и рост.
+6. **Behavioral Patterns**
+   - How do they discover new apps?
+   - What triggers app downloads?
+   - Usage frequency and session patterns
+   - In-app purchase behavior
+   - Churn patterns and reasons
 
-Важно: 30% времени — разработка. 70% — продвижение в поиске.`,
+### PHASE 3: COMPREHENSIVE COMPETITIVE LANDSCAPE
 
-        'post284': `🦜 **На работу с попугаем (Копирование стратегий)**
+7. **Market Leaders Analysis**
+   - Top 10 apps by downloads (last 12 months)
+   - Top 10 apps by revenue (last 12 months)
+   - Market share analysis
+   - Growth trajectories and trend analysis
 
-Знакомься, Юрэ.
-Запилил проект ParakeetAI — ИИ подсказывает ответы на собеседовании.
+8. **Success Story Deep Dives**
+   - How did top 3 competitors launch and gain initial traction?
+   - What viral/growth strategies did they use?
+   - Timeline of major feature releases and user growth correlation
+   - Marketing channels that drove their success
+   - Key partnerships and collaborations
 
-Как он это сделал?
-1. Взял то, что сейчас работает.
-2. Сделал MVP за 3 дня.
-3. **Скопировал рабочие стратегии конкурентов** в TikTok.
+9. **Launch Strategy Analysis**
+   - Soft launch markets and strategies
+   - App Store Optimization tactics
+   - User acquisition channels and costs
+   - Viral mechanics and organic growth drivers
+   - Community building approaches
 
-Он не придумывал "уникальный маркетинг". Он посмотрел, какие ролики залетают у конкурентов, и сделал так же.
-Результат: **$16к в месяц**.`,
+### PHASE 4: MONETIZATION & FEATURE ANALYSIS
 
-        'post456': `😬 **Кто твой клиент: Консерватор или Инноватор?**
+10. **Revenue Model Research**
+    - Free vs paid app distribution
+    - In-app purchase strategies and pricing tiers
+    - Subscription models and retention rates
+    - Ad-supported features and user tolerance
+    - Premium feature analysis
 
-Чтобы продукт взлетел, надо понимать психологию ICP.
-Есть сферы, где люди любят новинки (Дизайнеры, Маркетологи). Они пробуют всё.
-Есть консерваторы (Юристы, Бухгалтеры). Им хочется, чтобы «всё было как раньше».
+11. **Feature Differentiation**
+    - Core features comparison matrix
+    - Unique selling propositions
+    - Feature gap analysis
+    - User-requested features from reviews
+    - Emerging feature trends
 
-Пример: Фотостоки умирают из-за AI. Почему? Потому что их клиенты (дизайнеры) — инноваторы. Они первыми побежали пробовать Midjourney.
+### PHASE 5: FACEBOOK ADS LIBRARY INTELLIGENCE
 
-Если твой ICP — консерватор, AI для него риск.
-Если инноватор — AI для него возможность.`,
+12. **Advertising Research**
+    - Search Facebook Ads Library for top 10 competitors
+    - Analyze ad creatives, messaging, and targeting
+    - Identify seasonal campaign patterns
+    - Document ad formats (video, carousel, static)
+    - Note pain points addressed in ad copy
+    - Track ad frequency and budget estimates
 
-        'post539': `🍏 **Почему конкуренция — это хорошо**
+13. **Creative Strategy Analysis**
+    - What problems do ads highlight?
+    - What emotions do successful ads trigger?
+    - What call-to-actions convert best?
+    - Visual style trends and patterns
 
-Ты видел рынки, где 10 продавцов продают одни и те же яблоки?
-Как они зарабатывают?
+### PHASE 6: GLOBAL MARKET DYNAMICS
 
-Секрет: **Каждое новое предложение усиливает спрос.**
-Больше продавцов -> Больше шума -> Больше людей узнают, что им "нужны яблоки".
+14. **Regional Analysis**
+    - Usage patterns by country/region
+    - Cultural preferences and adaptations
+    - Regulatory considerations
+    - Localization requirements
+    - Regional competitor variations
 
-Если на рынке много конкурентов — это значит:
-1. Там много денег.
-2. Клиенты уже обучены платить.
-3. Тебе не надо объяснять, "что это". Тебе надо просто сказать: "У меня вкуснее/дешевле".`,
-        
-        'post531': `🧱 **Конкуренты делают плохо? Делай хорошо!**
+15. **Market Size & Growth**
+    - Total addressable market (TAM)
+    - Serviceable addressable market (SAM)
+    - Market growth rates and projections
+    - Seasonal trends and patterns
 
-Один парень нашел нишу SEO-софта. Там уже были конкуренты.
-Но он заметил, что их софт глючит, поддержка молчит, а интерфейс из 90-х.
+### PHASE 7: TECHNICAL & PLATFORM INSIGHTS
 
-Он просто скопировал функционал.
-Но сделал его стабильным. И отвечал клиентам в чате.
+16. **Platform Performance**
+    - iOS vs Android user behavior differences
+    - App Store vs Google Play performance metrics
+    - Cross-platform development considerations
+    - Platform-specific features and limitations
 
-Итог: **$30k за 6 месяцев**.
-Ему не нужно было придумывать идею. Ему нужно было просто не быть отстоем, как остальные.`
-    };
+17. **Technical Requirements**
+    - Common technical pain points
+    - Performance benchmarks and expectations
+    - Integration requirements
+    - Security and privacy concerns
 
-    // --- SLIDER & MODAL LOGIC ---
+## RESEARCH TOOLS TO UTILIZE
+
+### Data Sources
+- **App Intelligence**: Sensor Tower, App Annie, SimilarWeb
+- **Social Listening**: Brandwatch, Mention, BuzzSumo
+- **Review Analysis**: App Tweak, AppFollow, ReviewTrackers
+- **Ad Intelligence**: Facebook Ads Library, AdSpy, PowerAdSpy
+- **Market Research**: Statista, Grand View Research, Allied Market Research
+- **User Feedback**: Reddit, Discord communities, YouTube comments
+- **ASO Tools**: ASOMobile, MobileAction, Keyword.io
+
+### Search Strategies
+- Use English keywords for broader international data
+- Search negative keywords: "worst", "hate", "annoying", "frustrating"
+- Look for "vs" comparisons between apps
+- Search for "alternatives to [app name]"
+- Find "feature request" and "wishlist" discussions
+
+## DELIVERABLE STRUCTURE
+
+### EXECUTIVE SUMMARY
+- 3-5 key pain points that represent massive opportunities
+- The "teleportation desire" for this app category
+- Top 3 market opportunities with size estimates
+- Critical success factors for new entrants
+
+### DETAILED FINDINGS
+
+1. **Pain Point Analysis**
+   - Detailed categorization with user quotes
+   - Frequency and severity rankings
+   - Competitive gaps and opportunities
+   - Unaddressed user needs
+
+2. **Ideal Customer Profile**
+   - Detailed persona with demographics, psychographics, behaviors
+   - Customer journey mapping
+   - Decision-making factors and triggers
+   - Preferred communication channels
+
+3. **Competitive Intelligence**
+   - Market positioning map
+   - Feature comparison matrix
+   - Success story case studies
+   - Launch strategy insights
+
+4. **Market Opportunity**
+   - Market size and growth projections
+   - Entry barriers and advantages
+   - Monetization opportunities
+   - Regional expansion potential
+
+5. **Strategic Recommendations**
+   - Product development priorities
+   - Go-to-market strategy
+   - User acquisition recommendations
+   - Monetization strategy
+   - Differentiation opportunities
+
+### SUPPORTING DATA
+- Screenshots of competitor ads
+- User review sentiment analysis
+- Market sizing calculations
+- Traffic and revenue estimates
+- Growth trajectory charts
+
+## SUCCESS METRICS TO TRACK
+- User acquisition cost (UAC) by channel
+- Lifetime value (LTV) estimates
+- Retention rates by cohort
+- Monetization conversion rates
+- App Store ranking factors
+- Social media engagement rates
+- Customer satisfaction scores
+
+## CRITICAL QUESTIONS TO ANSWER
+
+1. **Pain Points**: What makes users want to throw their phone when using similar apps?
+2. **Desires**: If users had a magic wand, what would they make this app category do?
+3. **Moments**: When exactly do users reach for these apps, and what triggers that moment?
+4. **Alternatives**: What do users do when existing apps fail them?
+5. **Value**: What would users pay premium prices for in this category?
+6. **Emotions**: What emotional transformation do users expect from using these apps?
+7. **Social**: How do users talk about these apps to friends?
+8. **Future**: Where is this category heading, and what will users expect next?
+
+## RESEARCH DEPTH REQUIREMENTS
+- Minimum 20 sources across 5 different types (reviews, social media, industry reports, ads, forums)
+- At least 1000 user data points analyzed
+- Geographic coverage of minimum 3 major markets
+- Historical data spanning 12+ months
+- Competitor analysis covering top 10 market players
+
+This analysis should result in a comprehensive understanding that goes beyond surface-level insights to uncover the fundamental human needs and frustrations that drive user behavior in this app category.`;
+
+    // --- SLIDER LOGIC ---
     const slides = document.querySelectorAll('.slide');
     const progress = document.getElementById('progress');
-    const modalOverlay = document.getElementById('modalOverlay');
-    const modalText = document.getElementById('modalText');
-    const modalSource = document.getElementById('modalSource');
+    const promptDisplay = document.getElementById('promptDisplay');
     let currentSlide = 0;
 
     function updateURL(index) {
@@ -573,49 +781,38 @@
         updateURL(index);
     }
 
-    function openModal(postId, sourceUrl, channelName) {
-        const content = posts[postId] || "Текст поста не найден.";
-        const formattedContent = content.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-        modalText.innerHTML = formattedContent;
-        
-        modalSource.href = sourceUrl;
-        modalSource.textContent = `Читать оригинал в канале "${channelName}"`;
-        
-        modalOverlay.classList.add('open');
-    }
-
-    function closeModal() {
-        modalOverlay.classList.remove('open');
-    }
-
-    function copyPrompt() {
-        const promptText = document.querySelector('.prompt-box').innerText;
-        navigator.clipboard.writeText(promptText).then(() => {
-            const btn = document.querySelector('.btn-copy');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = "✅ Скопировано!";
-            setTimeout(() => btn.innerHTML = originalText, 2000);
-        });
-    }
-
-    // Controls
+    // Initialize
     window.addEventListener('load', () => {
+        // Init Slider
         const urlParams = new URLSearchParams(window.location.search);
         const slideParam = parseInt(urlParams.get('slide'));
         showSlide(isNaN(slideParam) ? 0 : slideParam);
+
+        // Init Prompt Box
+        if(promptDisplay) {
+            promptDisplay.textContent = PROMPT_TEXT;
+        }
     });
+
+    // --- PROMPT COPY LOGIC ---
+    function copyPrompt() {
+        navigator.clipboard.writeText(PROMPT_TEXT).then(() => {
+            const btn = document.querySelector('.btn-copy');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "✅ Скопировано!";
+            btn.style.borderColor = "var(--accent)";
+            btn.style.color = "var(--accent)";
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.style.borderColor = "#555";
+                btn.style.color = "#fff";
+            }, 2000);
+        });
+    }
 
     document.addEventListener('keydown', (e) => {
-        if (modalOverlay.classList.contains('open')) {
-            if (e.key === 'Escape') closeModal();
-            return; 
-        }
         if (e.key === 'ArrowRight' || e.key === ' ') showSlide(currentSlide + 1);
         if (e.key === 'ArrowLeft') showSlide(currentSlide - 1);
-    });
-
-    modalOverlay.addEventListener('click', (e) => {
-        if (e.target === modalOverlay) closeModal();
     });
 </script>
 
