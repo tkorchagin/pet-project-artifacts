@@ -3,313 +3,371 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Урок 4: Упаковка Оффера | Тимофей Корчагин</title>
+    <title>Урок 4: Упаковка оффера</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600&family=Unbounded:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Библиотека для рендеринга Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <style>
         :root {
             --bg: #0f0f11;
-            --text-main: #f0f0f0;
-            --text-muted: #888888;
+            --text-main: #ffffff;
+            --text-muted: #f0f0f0; /* Почти белый для лучшей читаемости */
             --accent: #ccff00; 
             --accent-dim: rgba(204, 255, 0, 0.1);
             --danger: #ff4d4d;
             --surface: #1a1a1c;
             --surface-light: #252528;
-            --purple: #bf5af2;
+            --link-color: #00e5ff;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background-color: var(--bg); color: var(--text-main); font-family: 'Manrope', sans-serif; overflow: hidden; height: 100vh; width: 100vw; }
 
-        a { color: var(--accent); text-decoration: none; border-bottom: 1px dashed var(--accent); transition: all 0.3s; }
-        a:hover { background: var(--accent); color: var(--bg); border-bottom: none; }
-
         .deck { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
-        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; visibility: hidden; transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); transform: scale(0.98) translateY(20px); display: flex; flex-direction: column; justify-content: center; padding: 3rem 6rem; background: var(--bg); z-index: 1; }
+        .slide { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            opacity: 0; visibility: hidden; 
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); 
+            transform: scale(0.98) translateY(20px); 
+            display: flex; flex-direction: column; justify-content: center; 
+            padding: 4rem 8rem; background: var(--bg); z-index: 1; 
+        }
         .slide.active { opacity: 1; visibility: visible; transform: scale(1) translateY(0); z-index: 10; }
 
-        h1, h2, h3 { font-family: 'Unbounded', sans-serif; text-transform: uppercase; line-height: 1.1; letter-spacing: -0.02em; }
+        h1, h2, h3, h4 { font-family: 'Unbounded', sans-serif; text-transform: uppercase; line-height: 1.1; letter-spacing: -0.02em; }
         h1 { font-size: 4rem; color: var(--accent); margin-bottom: 1rem; }
-        h2 { font-size: 3rem; margin-bottom: 1rem; color: #fff; }
-        h3 { font-size: 1.5rem; margin-bottom: 0.5rem; color: #fff; }
-        p { font-size: 1.3rem; line-height: 1.5; color: var(--text-muted); max-width: 1100px; margin-bottom: 1rem; }
+        h2 { font-size: 3.2rem; margin-bottom: 1.5rem; color: #fff; }
+        h3 { font-size: 1.6rem; margin-bottom: 1rem; color: #fff; }
+        h4 { font-size: 1.1rem; color: var(--accent); margin-bottom: 0.5rem; }
+        p { font-size: 1.4rem; line-height: 1.5; color: var(--text-muted); max-width: 1100px; margin-bottom: 1rem; }
         
-        .highlight { color: var(--text-main); font-weight: 600; }
+        .highlight { color: #fff; font-weight: 600; }
         .accent-text { color: var(--accent); }
         .danger-text { color: var(--danger); }
-        .purple-text { color: var(--purple); }
-
-        .tag { display: inline-block; background: var(--surface-light); color: #fff; padding: 0.5rem 1rem; border-radius: 4px; font-family: 'Unbounded', sans-serif; font-size: 0.8rem; margin-bottom: 1.5rem; text-transform: uppercase; }
         
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; margin-top: 1rem; }
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 1rem; }
+        a { color: var(--link-color); text-decoration: none; border-bottom: 1px dashed var(--link-color); transition: 0.2s; font-weight: 600; }
+        a:hover { color: #fff; border-bottom-color: #fff; background: rgba(0, 229, 255, 0.1); }
+
+        .tag { display: inline-block; background: var(--surface-light); color: #fff; padding: 0.5rem 1rem; border-radius: 4px; font-family: 'Unbounded', sans-serif; font-size: 0.8rem; margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 1px;}
         
-        .card { background: var(--surface); padding: 2rem; border-radius: 16px; border: 1px solid #333; position: relative; display: flex; flex-direction: column; }
-        .card.active { border-color: var(--accent); }
-        .card.danger { border-color: var(--danger); }
-        .card.purple { border-color: var(--purple); }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; margin-top: 1.5rem; width: 100%; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 1.5rem; width: 100%; }
 
-        .big-number { font-size: 4rem; font-family: 'Unbounded', sans-serif; color: var(--surface); -webkit-text-stroke: 1px var(--surface-light); position: absolute; right: 2rem; bottom: 2rem; z-index: -1; opacity: 0.5; }
-
-        ul { list-style: none; }
-        li { font-size: 1.2rem; margin-bottom: 0.8rem; display: flex; align-items: start; color: var(--text-muted); }
-        li::before { content: "→"; color: var(--accent); margin-right: 0.8rem; font-family: 'Unbounded', sans-serif; flex-shrink: 0; }
-
-        .btn-copy {
-            background: var(--surface-light); border: 1px solid #555; color: #fff;
-            padding: 0.8rem 1.5rem; border-radius: 8px; cursor: pointer; font-family: 'Unbounded';
-            font-size: 1rem; margin-top: 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s;
+        .card { 
+            background: var(--surface); 
+            padding: 2.2rem; 
+            border-radius: 20px; 
+            border: 1px solid #333; 
+            position: relative; 
+            display: flex; flex-direction: column;
+            transition: 0.3s;
         }
-        .btn-copy:hover { border-color: var(--accent); color: var(--accent); transform: scale(1.02); }
+        .card.active { border-color: var(--accent); }
+        .card.dashed { border: 2px dashed var(--accent); background: rgba(204, 255, 0, 0.02); }
+        .card p { font-size: 1.15rem; color: #fff; margin-bottom: 0.8rem; }
 
-        /* Custom Table Style */
-        .matrix-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 1.1rem; }
-        .matrix-table th { text-align: left; color: var(--accent); font-family: 'Unbounded'; padding: 1rem; border-bottom: 1px solid #333; }
-        .matrix-table td { padding: 1rem; border-bottom: 1px solid #333; color: var(--text-muted); vertical-align: top; }
-        .matrix-table tr:last-child td { border-bottom: none; }
-        .matrix-table td strong { color: #fff; display: block; margin-bottom: 0.3rem; }
+        .big-number { font-size: 6rem; font-family: 'Unbounded', sans-serif; color: var(--surface); -webkit-text-stroke: 2px var(--surface-light); position: absolute; right: 4rem; bottom: 3rem; z-index: -1; opacity: 0.3; pointer-events: none; }
+
+        ul.custom-list { list-style: none; padding: 0; }
+        ul.custom-list li { 
+            font-size: 1.3rem; margin-bottom: 1rem; display: flex; 
+            align-items: flex-start; color: #fff; line-height: 1.4;
+        }
+        ul.custom-list li::before { 
+            content: "→"; color: var(--accent); margin-right: 1rem; 
+            font-family: 'Unbounded', sans-serif; flex-shrink: 0; font-weight: bold; 
+        }
+
+        .btn-large {
+            display: inline-block; background: var(--accent); color: #000; 
+            font-family: 'Unbounded', sans-serif; font-size: 1.1rem; padding: 1.2rem 2rem; 
+            border-radius: 12px; margin-top: 1.5rem; text-decoration: none; transition: 0.2s; 
+            text-transform: uppercase; font-weight: 700; border: none; cursor: pointer;
+        }
+        .btn-large:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(204, 255, 0, 0.3); background: #fff; }
+
+        /* TACTICS SECTION */
+        .tactics-wrapper { position: relative; width: 100%; margin-top: 1.5rem; }
+        .btn-copy-tactics {
+            position: absolute; top: -1rem; right: 2rem; z-index: 50;
+            background: var(--accent); color: #000; border: none;
+            padding: 0.6rem 1.2rem; border-radius: 8px; cursor: pointer;
+            font-family: 'Unbounded'; font-size: 0.75rem; font-weight: 700;
+            text-transform: uppercase; transition: 0.2s;
+        }
+        .btn-copy-tactics.success { background: #fff; color: #000; }
+
+        .tactics-box {
+            background: #000; border: 1px solid #333; border-radius: 20px;
+            padding: 2.5rem; height: 420px; overflow-y: auto;
+            border-left: 4px solid var(--accent);
+        }
+        .tactics-box::-webkit-scrollbar { width: 8px; }
+        .tactics-box::-webkit-scrollbar-track { background: #000; }
+        .tactics-box::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        .tactics-box::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+        /* Rendered Markdown Styles */
+        .rendered-md { color: #fff; font-size: 1.1rem; line-height: 1.7; }
+        .rendered-md h3 { color: var(--accent); margin-bottom: 1.2rem; font-size: 1.4rem; border-bottom: 1px solid #222; padding-bottom: 0.5rem; }
+        .rendered-md ul { padding-left: 1.5rem; margin-bottom: 1.5rem; }
+        .rendered-md li { margin-bottom: 0.8rem; }
+        .rendered-md strong { color: var(--accent); }
 
         .progress-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: #222; z-index: 100; }
         .progress { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s ease; }
+
+        @media (max-width: 768px) {
+            .slide { padding: 2rem; overflow-y: auto; display: block; }
+            .grid { grid-template-columns: 1fr; }
+            h1 { font-size: 2.5rem; }
+            h2 { font-size: 1.8rem; }
+            .tactics-box { height: 300px; }
+        }
     </style>
 </head>
 <body>
 
 <div class="deck" id="deck">
 
-    <!-- 1. INTRO -->
+    <!-- 1. START -->
     <section class="slide active">
         <div class="tag">УРОК 4</div>
-        <h1>Упаковка Оффера 📦</h1>
-        <p class="highlight" style="font-size: 1.8rem; margin-top: 1rem;">Лендинг, Бот или Пост?</p>
-        <p style="margin-top: 1rem;">Как написать оффер, если не умеешь писать, и какую форму выбрать, чтобы купили.</p>
+        <h1>Упаковка<br>оффера</h1>
+        <p class="highlight" style="font-size: 2.2rem; color: #fff;">Делаем предложение, от которого нельзя отказаться.</p>
+        <p style="margin-bottom: 3rem; color: #f0f0f0;">На прошлом уроке мы стали экспертами в своей нише.&nbsp;Теперь превращаем знания в деньги.&nbsp;Режем всё лишнее и пишем тексты, которые продают.</p>
+        
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #333; display: flex; align-items: center; gap: 2rem;">
+            <div>
+                <p class="highlight" style="margin-bottom: 0; font-family: 'Unbounded', sans-serif; font-size: 1rem; color: #fff;">Тимофей Корчагин</p>
+                <p style="margin-bottom: 0; color: var(--accent); font-family: 'Unbounded', sans-serif; font-size: 0.8rem;">@tkorchagin</p>
+            </div>
+            <div style="margin-left: auto; text-align: right;">
+                <p style="font-size: 0.8rem; letter-spacing: 0.2em; color: var(--text-muted); text-transform: uppercase;">MONEY MAKER<br>MODULE</p>
+            </div>
+        </div>
         <div class="big-number">01</div>
     </section>
 
-    <!-- 2. FORM MATTERS (WEIGHT LOSS EXAMPLE) -->
+    <!-- 2. RECAP -->
     <section class="slide">
-        <div class="tag danger">ФУНДАМЕНТ</div>
-        <h2>Важна ли форма?</h2>
-        <p>Давайте разберем на примере ниши <b>«Похудение»</b>.</p>
-        
-        <div class="grid-3" style="margin-top: 2rem;">
-            <div class="card danger">
-                <h3 class="danger-text">Бот?</h3>
-                <p>«Купи бота для похудения».</p>
-                <p style="font-size: 3rem; margin-top: 1rem;">❌</p>
-                <p style="font-size: 0.9rem;">Люди не привыкли худеть через чат-ботов. Это странно.</p>
-            </div>
-            <div class="card active">
-                <h3 class="accent-text">Курс?</h3>
-                <p>«Марафон похудения».</p>
-                <p style="font-size: 3rem; margin-top: 1rem;">✅</p>
-                <p style="font-size: 0.9rem;">Покупают тысячами. Привычный формат.</p>
-            </div>
-            <div class="card active">
-                <h3 class="accent-text">Приложение?</h3>
-                <p>«Трекер калорий».</p>
-                <p style="font-size: 3rem; margin-top: 1rem;">✅</p>
-                <p style="font-size: 0.9rem;">Понятная утилита. Покупают подписку.</p>
-            </div>
+        <div class="tag">ЧТО МЫ УЗНАЛИ 🔙</div>
+        <h2>База готова</h2>
+        <ul class="custom-list">
+            <li><span><b>Проверили спрос цифрами</b> — Wordstat и AppMagic подтвердили спрос.</span></li>
+            <li><span><b>Прошли путь юзера</b> — мы увидели конкурентов изнутри.</span></li>
+            <li><span><b>Нашли слабые места</b> — негативные отзывы подсказали точки роста.</span></li>
+        </ul>
+        <div class="card active" style="margin-top: 2rem;">
+            <p style="margin: 0; color: var(--accent);">У тебя есть: Понимание рынка, боли аудитории и слабости конкурентов.&nbsp;Пора это упаковать.</p>
         </div>
         <div class="big-number">02</div>
     </section>
 
-    <!-- 3. MARKET RULE -->
+    <!-- 3. PLAN -->
     <section class="slide">
-        <div class="tag">ПРАВИЛО РЫНКА</div>
-        <h2>Не иди против течения 🌊</h2>
-        <p class="highlight">Кто мы такие, чтобы спорить с желаниями клиента?</p>
-        
-        <div class="grid" style="margin-top: 2rem;">
+        <div class="tag">МАРШРУТ 🗺️</div>
+        <h2>План урока</h2>
+        <div class="grid">
             <div class="card active">
-                <h3>Закон Формы:</h3>
-                <ul>
-                    <li>Покупают приложения? <b>Делаем приложение.</b></li>
-                    <li>Покупают курсы? <b>Упаковываем твой код как "Доступ к закрытому клубу".</b></li>
-                    <li>Покупают услугу? <b>Делаем бота, который прикидывается человеком.</b></li>
+                <h3>Темы дня:</h3>
+                <ul class="custom-list">
+                    <li><span><b>Кто такие ICP?</b> — профиль идеального клиента.</span></li>
+                    <li><span><b>PMHS</b> — формула продающего текста.</span></li>
+                    <li><span><b>Ads Spy</b> — рекламный шпионаж.</span></li>
                 </ul>
             </div>
-            <div class="card neutral" style="justify-content: center;">
-                <p style="font-size: 1.4rem; text-align: center;">То, что внутри (код) — важно.<br>Но если молоко налить в бутылку из-под машинного масла — <b>его не купят</b>.</p>
+            <div class="card dashed">
+                <h3 style="color:#fff;">Дальше:</h3>
+                <p><b>Запуск.</b> Как получить первых платящих клиентов и проверить гипотезу деньгами.</p>
             </div>
         </div>
         <div class="big-number">03</div>
     </section>
 
-    <!-- 4. PMHS FORMULA -->
+    <!-- 4. WHO IS ICP -->
     <section class="slide">
-        <div class="tag">КОПИРАЙТИНГ</div>
-        <h2>Как писать, не умея писать?</h2>
-        <p>Используем формулу <b>PMHS</b>. Это алгоритм для технарей.</p>
+        <div class="tag">СТРАТЕГИЯ 🎯</div>
+        <h2>Кто такие ICP?</h2>
+        <p class="highlight" style="color:#fff;">Ideal Customer Profile — это не "женщины 25-45".&nbsp;Это КОНКРЕТНЫЙ человек в КОНКРЕТНОЙ ситуации.</p>
         
-        <div class="grid" style="grid-template-columns: repeat(4, 1fr); gap: 1rem;">
-            <div class="card danger">
-                <h3 class="danger-text">P (Pain)</h3>
-                <p>Боль.<br>Ткни в рану.</p>
-            </div>
-            <div class="card danger" style="border-left: 4px solid var(--danger);">
-                <h3 class="danger-text">M (More Pain)</h3>
-                <p>Усиление.<br>Покрути ножом. Что будет, если не решить?</p>
-            </div>
+        <div class="grid">
             <div class="card active">
-                <h3 class="accent-text">H (Hope)</h3>
-                <p>Надежда.<br>Есть другой, легкий путь.</p>
+                <h3>Формула 4х1:</h3>
+                <ul class="custom-list">
+                    <li><span><b>Один человек</b> — роль, возраст, контекст.</span></li>
+                    <li><span><b>Одна боль</b> — что болит прямо сейчас?</span></li>
+                    <li><span><b>Одно решение</b> — что ты даешь?</span></li>
+                    <li><span><b>Один канал</b> — где его найти?</span></li>
+                </ul>
             </div>
-            <div class="card active" style="border-left: 4px solid var(--accent);">
-                <h3 class="accent-text">S (Solution)</h3>
-                <p>Решение.<br>Твой продукт.</p>
+            <div class="card">
+                <h3>Зачем это нужно?</h3>
+                <p>Чем уже ниша — тем дешевле реклама и выше конверсия.&nbsp;<b class="accent-text">"Ни для кого"</b> начинается там, где ты пытаешься продать сразу всем.</p>
             </div>
         </div>
         <div class="big-number">04</div>
     </section>
 
-    <!-- 5. PMHS EXAMPLE (TAROT) -->
+    <!-- 5. ICP EXAMPLE -->
     <section class="slide">
-        <div class="tag">ПРИМЕР</div>
-        <h2>Разбор: Таро-бот 🔮</h2>
-        
-        <div class="card active" style="margin-top: 1rem;">
-            <div style="display: grid; grid-template-columns: 80px 1fr; gap: 1rem; margin-bottom: 1rem;">
-                <strong class="danger-text">PAIN:</strong>
-                <span>Он читает сообщения, но молчит? Ты не понимаешь, что у него в голове?</span>
+        <div class="tag">ПРИМЕР 📝</div>
+        <h2>Конкретика решает</h2>
+        <div class="grid">
+            <div class="card" style="border-color: #444;">
+                <h4>❌ Размыто:</h4>
+                <p>Женщины, интересующиеся астрологией и гороскопами в свободное время.</p>
             </div>
-            <div style="display: grid; grid-template-columns: 80px 1fr; gap: 1rem; margin-bottom: 1rem;">
-                <strong class="danger-text">MORE:</strong>
-                <span>Неизвестность убивает. Ты проверяешь телефон каждые 5 минут, накручиваешь себя и теряешь гордость.</span>
-            </div>
-            <div style="display: grid; grid-template-columns: 80px 1fr; gap: 1rem; margin-bottom: 1rem;">
-                <strong class="accent-text">HOPE:</strong>
-                <span>Представь, если бы ты могла прямо сейчас узнать его истинные мысли, не унижаясь вопросами.</span>
-            </div>
-            <div style="display: grid; grid-template-columns: 80px 1fr; gap: 1rem;">
-                <strong class="accent-text">SOL:</strong>
-                <span>Анонимный Таро-расклад в Telegram. Введи имя — получи ответ карт и стратегию поведения через 30 секунд.</span>
+            <div class="card active">
+                <h4>✅ В точку (ICP):</h4>
+                <p>Девушка 28 лет.&nbsp;2 часа ночи.&nbsp;Он прочитал сообщение и молчит уже 3 часа.&nbsp;Она не может уснуть, накручивает себя.&nbsp;Хочет понять, что у него в голове прямо сейчас.</p>
             </div>
         </div>
         <div class="big-number">05</div>
     </section>
 
-    <!-- 6. MATRIX OF PACKAGING -->
+    <!-- 6. FOCUS -->
     <section class="slide">
-        <div class="tag">ИНСТРУМЕНТЫ</div>
-        <h2>Матрица: Куда положить текст?</h2>
-        <p>Выбираем упаковку исходя из типа продукта.</p>
+        <div class="tag danger">ФОКУС ✂️</div>
+        <h2>Ловушка "Всего и побольше"</h2>
+        <p style="color: #fff;">На старте 100 идей и 50 фич — это прямой путь к провалу.&nbsp;Сложные продукты долго пилятся и трудно продаются.</p>
         
-        <div class="card active" style="padding: 0; overflow: hidden;">
-            <table class="matrix-table">
-                <thead>
-                    <tr>
-                        <th width="30%">Тип продукта</th>
-                        <th width="30%">Упаковка</th>
-                        <th>Почему?</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>Импульс / Эмоция</strong><br>(Таро, Пранки, Тесты)</td>
-                        <td><span class="tag" style="margin:0; background: var(--purple);">Stories / Post</span></td>
-                        <td>Решение принимается за секунду. Нужна яркая картинка и большая кнопка.</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Утилита</strong><br>(VPN, Скачать видео)</td>
-                        <td><span class="tag" style="margin:0; background: #333;">Telegram Bot</span></td>
-                        <td>"Вот проблема — вот кнопка". Не грузи лонгридами.</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Сложное / B2B</strong><br>(Парсинг, Софт)</td>
-                        <td><span class="tag" style="margin:0; background: #333;">Notion / Telegraph</span></td>
-                        <td>Нужно доверие, кейсы и объяснение "как это работает".</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Услуга</strong><br>(Резюме, Дизайн)</td>
-                        <td><span class="tag" style="margin:0; background: #00AAFF;">Авито / Kwork</span></td>
-                        <td>Там уже ищут исполнителя. Упаковка — это фото профиля.</td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="grid">
+            <div class="card" style="opacity: 0.6;">
+                <h4>⚙️ Сложный комбайн:</h4>
+                <p>«Астро-приложение с гороскопами, совместимостью, календарем и медитациями».</p>
+            </div>
+            <div class="card active" style="border-color: var(--accent);">
+                <h4>💎 Острая игла:</h4>
+                <p>«Узнай, что он думает о тебе — персональный астро-совет за 30 секунд».</p>
+            </div>
         </div>
+        <p style="margin-top: 1.5rem; color: #fff;">Твоя задача — выбрать ОДНУ боль и решить её лучше всех.&nbsp;<b class="accent-text">Режь лишнее беспощадно.</b></p>
         <div class="big-number">06</div>
     </section>
 
-    <!-- 7. SPYING (WEB2WEB & MIRO) -->
+    <!-- 7. PMHS -->
     <section class="slide">
-        <div class="tag">НАСМОТРЕННОСТЬ</div>
-        <h2>Воруй как художник 🕵️‍♂️</h2>
-        <p class="highlight">Не изобретай велосипед. Посмотри, как продают лидеры.</p>
+        <div class="tag">КОПИРАЙТИНГ ✍️</div>
+        <h2>Формула PMHS</h2>
+        <p style="color:#fff;">Структура, которая ведет пользователя от боли к покупке:</p>
         
         <div class="grid">
-            <div class="card active">
-                <h3>Где смотреть воронки?</h3>
-                <ul style="margin-top: 1rem;">
-                    <li><a href="https://docs.google.com/spreadsheets/d/1gguwoqz6HQgkTvLwdEZux-r8Q2_fNej_Gnj5Q3nNMI4/edit?gid=0#gid=0" target="_blank">Web2Web Funnels</a> (Таблица)</li>
-                    <li><a href="https://miro.com/app/board/uXjVKp4bamc=/" target="_blank">Miro: Логика воронок</a></li>
-                </ul>
-                <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);">Задача: Прокликать 10 конкурентов и заскринить их путь от рекламы до оплаты.</p>
+            <div class="card active" style="padding: 1.5rem; border-color: var(--accent);">
+                <h4 style="color: var(--accent);">1. PAIN (БОЛЬ)</h4>
+                <p>Ткни в рану словами клиента.&nbsp;<i>"Он молчит уже 3 часа?"</i></p>
             </div>
-            <div class="card neutral">
-                <h3>На что смотреть?</h3>
-                <p>Не смотри на красоту.</p>
-                <p class="accent-text">Смотри на ЛОГИКУ:</p>
-                <ul>
-                    <li>Что спрашивают первым?</li>
-                    <li>Где обещают счастье?</li>
-                    <li>В какой момент просят деньги?</li>
-                </ul>
+            <div class="card active" style="padding: 1.5rem; border-color: var(--accent);">
+                <h4 style="color: var(--accent);">2. MORE PAIN (УСИЛЕНИЕ)</h4>
+                <p>Покажи последствия бездействия.&nbsp;<i>"Ты не уснешь до утра."</i></p>
+            </div>
+            <div class="card active" style="padding: 1.5rem; border-color: var(--accent);">
+                <h4 style="color: var(--accent);">3. HOPE (НАДЕЖДА)</h4>
+                <p>Покажи свет в конце туннеля.&nbsp;<i>"Но можно узнать правду сейчас."</i></p>
+            </div>
+            <div class="card active" style="padding: 1.5rem; border-color: var(--accent);">
+                <h4 style="color: var(--accent);">4. SOLUTION (РЕШЕНИЕ)</h4>
+                <p>Твой продукт.&nbsp;<i>"Бот 'Спроси звёзды': ответ за 30с. 99₽."</i></p>
             </div>
         </div>
         <div class="big-number">07</div>
     </section>
 
-    <!-- 8. PAYMENTS -->
+    <!-- 8. PMHS EXAMPLE -->
     <section class="slide">
-        <div class="tag">ДЕНЬГИ</div>
-        <h2>Как принять оплату ЗАВТРА? 💸</h2>
-        <p>Забудь про ИП, кассы и сложные пейволы. Нам нужен быстрый тест.</p>
-        
-        <div class="grid">
-            <div class="card active">
-                <h3 class="accent-text">1. Telegram Stars ⭐️</h3>
-                <p>Нативно. Внутри бота. В 2 клика.</p>
-                <p style="font-size: 0.9rem; margin-top: 0.5rem;">Идеально для цифровых товаров (гайд, расклад, подписка). Пользователь не боится платить.</p>
-            </div>
-            <div class="card">
-                <h3>2. Донат / Ссылка</h3>
-                <p>Обычная ссылка на "Тинькофф Сбор" или карту.</p>
-                <p style="font-size: 0.9rem; margin-top: 0.5rem;">Текст: <i>"Я собираю на развитие проекта, если полезно — угостите кофе"</i>. Для MVP это нормально.</p>
-            </div>
+        <div class="tag">КЕЙС 🔮</div>
+        <h2>Как это выглядит вместе</h2>
+        <div class="card active" style="background: linear-gradient(145deg, #1a1a1c 0%, #222 100%);">
+            <p style="font-size: 1.35rem; line-height: 1.6;">
+                <b class="accent-text">[P]</b> Он молчит уже 3 часа.&nbsp;Прочитал — и ничего.&nbsp;В голове: "Что я сделала не так?", "У него другая?"<br><br>
+                <b class="accent-text">[M]</b> Эта неизвестность — хуже любого ответа.&nbsp;Ты проведешь всю ночь обновляя чат, пока он спокойно спит.<br><br>
+                <b class="accent-text">[H]</b> Но что если ты могла бы узнать его истинные мысли прямо сейчас — без лишних вопросов и ожидания?<br><br>
+                <b class="accent-text">[S]</b> Бот "Спроси звёзды" — персональный астро-совет на его молчание.&nbsp;Узнай правду за 30 секунд за 99₽.
+            </p>
         </div>
-        <p class="highlight" style="margin-top: 2rem;">Главное: Кнопка оплаты должна быть СРАЗУ после блока Solution.</p>
         <div class="big-number">08</div>
     </section>
 
-    <!-- 9. HOMEWORK -->
+    <!-- 10. SPY FB -->
     <section class="slide">
-        <div class="tag">ДОМАШКА</div>
-        <h2>Задание на неделю</h2>
+        <div class="tag">ШПИОНАЖ 🕵️</div>
+        <h2>Facebook Ads Library</h2>
+        <p class="highlight" style="color:#fff;">Смотрим на живые креативы конкурентов.</p>
+        
         <div class="card active">
-            <ol style="font-size: 1.3rem; line-height: 1.6;">
-                <li><b>Spy:</b> Найти 3 конкурентов. Собрать в Figma их путь (Реклама → Упаковка → Оплата).</li>
-                <li><b>Text:</b> Написать свой оффер по формуле <b>PMHS</b>.</li>
-                <li><b>Pack:</b> Собрать это в MVP (Пост в канале, Бот или страница в Notion).</li>
-                <li><b>Link:</b> Прислать ссылку, по которой я захочу купить.</li>
-            </ol>
+            <ul class="custom-list">
+                <li><span>Зайди в <a href="https://www.facebook.com/ads/library/" target="_blank">FB Ads Library</a>.</span></li>
+                <li><span><b>Обязательно:</b> Выключи AdBlock, иначе библиотека будет пустой.</span></li>
+                <li><span>Ищи по ключам "гороскоп", "ai", "совет".&nbsp;Смотри на хуки.</span></li>
+                <li><span>Если реклама крутится > 30 дней — она <b class="accent-text">приносит прибыль</b>.</span></li>
+            </ul>
         </div>
-        <div class="card neutral" style="margin-top: 1.5rem; border: none; background: transparent;">
-             <p style="text-align: center;">Не пишите код, пока не будет оффера, за который хочется отдать деньги.</p>
-        </div>
-        <div class="big-number">HW</div>
+        <div class="big-number">09</div>
     </section>
 
-    <!-- 10. FINAL -->
+    <!-- 12. TACTICS BOX -->
     <section class="slide">
-        <div class="tag">ФИНАЛ</div>
-        <h2>Упаковка — это обещание</h2>
-        <p class="highlight" style="font-size: 2rem;">Код нужен, чтобы выполнить обещание.<br>Но продает именно обещание.</p>
-        <div class="big-number">END</div>
+        <div class="tag">КОНВЕРСИЯ 💎</div>
+        <h2>Тактики повышения конверсии</h2>
+        <p style="color:#fff;">Мега-список идей для твоих офферов. Листай и внедряй.</p>
+        
+        <div class="tactics-wrapper">
+            <button class="btn-copy-tactics" id="copyBtn" onclick="copyTactics()">Копировать Markdown</button>
+            <div class="tactics-box">
+                <div id="mdContainer" class="rendered-md"></div>
+            </div>
+        </div>
+        <div class="big-number">10</div>
+    </section>
+
+    <!-- 14. FAKE DOOR -->
+    <section class="slide">
+        <div class="tag danger">ТЕСТ 🧪</div>
+        <h2>Fake Door Test</h2>
+        <p class="highlight" style="color:#fff;">Первая продажа за 24 часа.&nbsp;Проверь гипотезу деньгами раньше, чем кодом.</p>
+        
+        <div class="grid">
+            <div class="card active">
+                <ul class="custom-list">
+                    <li><span>Собери простую страницу (Notion или Tilda).</span></li>
+                    <li><span>Поставь цену и кнопку <b>"Купить"</b>.</span></li>
+                    <li><span>Кнопка ведет в ТГ или на оплату (ЮMoney/Stars).</span></li>
+                </ul>
+            </div>
+            <div class="card danger">
+                <h3 style="color:#fff;">Закон:</h3>
+                <p>Взять деньги и сделать продукт — <b>Бизнес</b>.</p>
+                <p>Взять деньги и исчезнуть — <b>Мошенничество</b>.</p>
+                <p><i>Если продукта нет — делай услугу вручную или возвращай средства.</i></p>
+            </div>
+        </div>
+        <div class="big-number">11</div>
+    </section>
+
+    <!-- 15. HOMEWORK -->
+    <section class="slide">
+        <div class="tag">ИТОГ 🏠</div>
+        <h2>Домашнее задание</h2>
+        <div class="grid">
+            <div class="card active">
+                <h3>Твой план:</h3>
+                <ul class="custom-list">
+                    <li><span>Определи ICP (роль + ситуация).</span></li>
+                    <li><span>Напиши PMHS-текст.</span></li>
+                    <li><span>Собери черновик страницы/бота.</span></li>
+                </ul>
+                <a href="https://docs.google.com/spreadsheets/d/19VO_YG3gpXGBmBTzuLBIrM9kkseKvqfUrcjdjqMn1qM/edit?pli=1&gid=823584632#gid=823584632" target="_blank" class="btn-large">📝 Открыть таблицу</a>
+            </div>
+            <div class="card dashed">
+                <h3 class="accent-text">На следующем уроке:</h3>
+                <p style="color:#fff;"><b>Запуск.</b></p>
+                <p>Выбираем канал, пишем первые сообщения, получаем первые оплаты.&nbsp;Переходим к РЕАЛЬНЫМ деньгам.</p>
+            </div>
+        </div>
+        <div class="big-number">12</div>
     </section>
 
 </div>
@@ -317,26 +375,471 @@
 <div class="progress-container"><div class="progress" id="progress"></div></div>
 
 <script>
+    // MARKDOWN CONTENT
+    const TACTICS_MD = `# Мега-список тактик повышения конверсии оффера
+
+> Для курса по пет-проектам: упаковка продукта и создание обещания
+
+---
+
+## 1. СРОЧНОСТЬ И ДЕФИЦИТ (Urgency & Scarcity)
+
+### Временные ограничения
+- **Таймер обратного отсчёта** — визуальный дедлайн на странице
+- **Редирект после истечения таймера** — страница автоматически меняется
+- **Фиксированная дата закрытия** — "Набор только до 15 января"
+- **Сезонность оффера** — "Только на этой неделе / в этом месяце"
+- **Early-bird pricing** — цена растёт с каждым днём/неделей
+- **Flash-sale** — молниеносная распродажа на несколько часов
+- **Запуск волнами** — "Первый поток стартует через 5 дней"
+
+### Количественные ограничения
+- **Лимит мест** — "Осталось 12 из 50 мест"
+- **Живой счётчик остатков** — динамически уменьшается
+- **"Только для первых N"** — эксклюзивные бонусы
+- **Waitlist после закрытия** — лист ожидания создаёт ценность
+- **Limited edition** — ограниченный выпуск версии продукта
+
+### Социальное давление
+- **"X человек смотрят сейчас"** — реал-тайм посетители
+- **"Y купили за последний час"** — недавние покупки
+- **"Места заканчиваются быстро"** — исторические данные
+- **FOMO-триггеры** — "Не пропусти, как прошлые 500 человек"
+
+---
+
+## 2. СОЦИАЛЬНОЕ ДОКАЗАТЕЛЬСТВО (Social Proof)
+
+### Отзывы и рейтинги
+- **Видео-отзывы** — лица реальных людей
+- **Скриншоты переписок** — мессенджеры, соцсети
+- **Аудио-отзывы** — голосовые сообщения
+- **До/После** — трансформация клиентов
+- **Звёздный рейтинг** — 4.9/5 на основе N отзывов
+- **Отзывы с фото** — UGC контент
+- **Цитаты с именем и фото** — конкретные люди
+- **Количество отзывов** — "2,847 отзывов"
+
+### Цифры и метрики
+- **Количество клиентов/студентов** — "10,000+ выпускников"
+- **Сумма заработка клиентов** — "Заработали $5M суммарно"
+- **Средний результат** — "В среднем рост на 340%"
+- **Время до результата** — "Первые продажи за 14 дней"
+- **Retention rate** — "92% проходят до конца"
+
+### Авторитет и медиа
+- **Логотипы медиа** — "Нас упоминали в Forbes, RBC..."
+- **Логотипы клиентов/партнёров** — "Нам доверяют"
+- **Награды и бейджи** — G2, Product Hunt, премии
+- **Сертификаты** — официальные аккредитации
+- **Упоминания экспертов** — цитаты от лидеров ниши
+
+### Реал-тайм доказательства
+- **Поп-апы "Иван только что купил"** — live-уведомления
+- **Активность в сообществе** — "3,247 участников в чате"
+- **Счётчик онлайн** — сколько сейчас на странице
+- **Recent activity feed** — лента последних действий
+
+---
+
+## 3. ГАРАНТИИ И СНЯТИЕ РИСКОВ (Risk Reversal)
+
+### Денежные гарантии
+- **Money-back guarantee** — возврат денег без вопросов
+- **30/60/90/365 дней** — разные сроки гарантии
+- **Double money-back** — вернём вдвое больше
+- **Частичный возврат** — пропорционально пройденному
+- **Пробный период** — 7 дней бесплатно
+
+### Гарантии результата
+- **Результат или возврат** — "Получишь оффер или вернём деньги"
+- **ROI гарантия** — "Окупится в 10 раз или возврат"
+- **Пока не получишь результат** — бессрочный доступ
+- **Бесплатная доработка** — "Буду работать пока не получится"
+- **Performance guarantee** — конкретные метрики
+
+### Процессные гарантии
+- **Lifetime access** — вечный доступ к материалам
+- **Бесплатные обновления** — все будущие версии
+- **Заморозка** — можно поставить на паузу
+- **Поддержка на N месяцев** — гарантированная помощь
+
+### Формулировки гарантий
+- **"Без вопросов"** — no questions asked
+- **"Рискуете только временем"** — не деньгами
+- **"Попробуй, а потом реши"** — take the puppy home
+- **"Весь риск на мне"** — ты ничем не рискуешь
+
+---
+
+## 4. ЦЕНООБРАЗОВАНИЕ И ПСИХОЛОГИЯ ЦЕН (Pricing Psychology)
+
+### Форматы цены
+- **Charm pricing** — $97 вместо $100, 9990₽ вместо 10000₽
+- **Округлённые цены** — для премиум-продуктов (500, 1000)
+- **Без копеек** — 19900 вместо 19900.00
+- **Перечёркнутая цена** — было 50000, стало 29900
+- **Цена за день/месяц** — "всего 99₽ в день"
+
+### Якорение (Anchoring)
+- **Высокая цена сначала** — показать премиум тариф первым
+- **Сравнение с дорогой альтернативой** — "MBA стоит 2 млн..."
+- **Стоимость проблемы** — "Сколько теряешь без этого?"
+- **Цена по частям** — показать ценность каждого модуля
+- **"Если бы продавал отдельно"** — суммарная стоимость
+
+### Decoy Effect (Эффект приманки)
+- **Три тарифа** — базовый, стандарт (цель), премиум
+- **Невыгодный средний** — чтобы высокий казался лучше
+- **Пакет "Всё включено"** — рядом с базовым
+- **Центральная позиция** — целевой тариф посередине
+
+### Фрейминг стоимости
+- **Чашка кофе в день** — сравнение с мелочами
+- **Инвестиция vs расход** — смена фрейма
+- **Окупаемость** — "Вернётся за первую неделю"
+- **Бесплатно vs заплати** — бесплатное ценится меньше
+- **Стоимость бездействия** — цена НЕ-покупки
+
+---
+
+## 5. БОНУСЫ И VALUE STACKING
+
+### Типы бонусов
+- **Чеклисты и шаблоны** — готовые к использованию
+- **Дополнительные уроки** — эксклюзивный контент
+- **Доступ в сообщество** — закрытый чат/клуб
+- **1-on-1 консультация** — личное внимание
+- **Запись вебинара/мастермайнда** — ценный контент
+- **Софт/подписки** — доступ к инструментам
+- **Книга/гайд автора** — дополнительный продукт
+- **Готовые скрипты/код** — экономия времени
+
+### Презентация бонусов
+- **Стэкинг по одному** — показывать по очереди
+- **Ценность каждого бонуса** — "стоит 15,000₽"
+- **Суммарная ценность** — "Бонусы на 150,000₽"
+- **Визуальная стопка** — картинки бонусов друг на друге
+- **"Итого получаешь"** — финальный слайд всего
+
+### Эксклюзивность бонусов
+- **"Только для первых 50"** — лимит на бонус
+- **"Только сегодня"** — временный бонус
+- **"Только здесь"** — нигде больше не получить
+- **Fast-action bonus** — для быстро принявших решение
+- **Surprise bonus** — неожиданный бонус после покупки
+
+---
+
+## 6. CTA И КНОПКИ (Call-to-Action)
+
+### Текст кнопки
+- **От первого лица** — "Хочу научиться" vs "Научись"
+- **Конкретное действие** — "Получить доступ" vs "Купить"
+- **С выгодой** — "Начать зарабатывать" 
+- **Без риска** — "Попробовать бесплатно"
+- **Срочность** — "Забрать сейчас"
+
+### Дизайн кнопки
+- **Контрастный цвет** — выделяется на странице
+- **Размер** — достаточно большая (мин. 44x44px)
+- **White space** — воздух вокруг кнопки
+- **Тень/эффект** — визуально кликабельная
+- **Иконка** — стрелка, галочка, корзина
+
+### Позиционирование
+- **Above the fold** — видно без скролла
+- **После каждого блока** — повторяющиеся CTA
+- **Sticky button** — приклеенная кнопка
+- **Floating CTA** — плавающая кнопка
+- **В конце каждого аргумента** — логическое завершение
+
+### Поддерживающий текст
+- **Под кнопкой** — "Гарантия 30 дней"
+- **Рядом** — "Присоединились 1,247 человек"
+- **Микрокопия** — "Безопасная оплата"
+- **Напоминание выгоды** — краткое УТП
+
+---
+
+## 7. КОПИРАЙТИНГ И POWER WORDS
+
+### Категории power words
+
+**Срочность:**
+> сейчас, немедленно, мгновенно, быстро, срочно, ограниченно, последний шанс, успей, не упусти, пока есть
+
+**Эксклюзивность:**
+> только для, эксклюзивно, секретный, закрытый, VIP, элитный, избранный, для своих, инсайдерский
+
+**Простота:**
+> легко, просто, без усилий, за минуты, пошагово, готовый, под ключ, автоматически
+
+**Результат:**
+> гарантированно, доказанный, проверенный, работающий, результативный, эффективный
+
+**Трансформация:**
+> превратить, изменить, трансформировать, прорыв, революция, новый уровень
+
+**Бесплатность:**
+> бесплатно, в подарок, без затрат, без вложений, 0 рублей
+
+**Новизна:**
+> новый, впервые, свежий, обновлённый, 2024, последний
+
+### Формулы заголовков
+- **Как [результат] за [время] без [боль]**
+- **[Число] способов [желаемый результат]**
+- **Секрет [авторитет/успешных людей]**
+- **Почему [целевая аудитория] [делает/не делает X]**
+- **Единственный способ [желаемое]**
+- **[Результат] даже если [возражение]**
+
+---
+
+## 8. СТРУКТУРА ОФФЕРА
+
+### PMHS Framework (который ты уже используешь)
+- **Pain** — боль целевой аудитории
+- **More Pain** — усиление боли
+- **Hope** — надежда на решение
+- **Solution** — твоё решение
+
+### Дополнительные фреймворки
+
+**PAS (Problem-Agitate-Solution):**
+1. Проблема — называем боль
+2. Агитация — усиливаем дискомфорт
+3. Решение — предлагаем выход
+
+**AIDA:**
+1. Attention — захватить внимание
+2. Interest — вызвать интерес
+3. Desire — создать желание
+4. Action — призыв к действию
+
+**BAB (Before-After-Bridge):**
+1. Before — жизнь до продукта
+2. After — жизнь после
+3. Bridge — как продукт ведёт от Before к After
+
+**4P:**
+1. Promise — обещание
+2. Picture — визуализация результата
+3. Proof — доказательства
+4. Push — призыв к действию
+
+---
+
+## 9. ВИЗУАЛЬНЫЕ ЭЛЕМЕНТЫ
+
+### Медиа-контент
+- **Hero video** — видео на первом экране
+- **Демонстрация продукта** — скриншоты/видео внутри
+- **Фото автора** — лицо создаёт доверие
+- **Фото студентов** — реальные люди
+- **Инфографика результатов** — визуализация данных
+- **GIF-превью** — динамичный контент
+
+### Дизайн-элементы
+- **Стрелки и указатели** — направляют внимание
+- **Хайлайты** — выделение важного жёлтым
+- **Иконки** — визуальная структура
+- **Чекмарки** — списки преимуществ ✓
+- **Badges** — "Бестселлер", "#1 в нише"
+- **Progress bars** — сколько мест осталось
+
+### UI/UX оптимизация
+- **White space** — воздух между блоками
+- **F-pattern / Z-pattern** — расположение контента
+- **Визуальная иерархия** — что важнее - больше
+- **Мобильная оптимизация** — 54%+ трафика с мобильных
+- **Скорость загрузки** — каждая секунда = -7% конверсии
+
+---
+
+## 10. ОБРАБОТКА ВОЗРАЖЕНИЙ
+
+### Типичные возражения и ответы
+- **"Дорого"** → Сравнение с альтернативами, рассрочка, ROI
+- **"Нет времени"** → Сколько времени нужно реально, микро-шаги
+- **"Не уверен что сработает"** → Гарантия, кейсы похожих людей
+- **"Подумаю"** → Дедлайн, цена вырастет
+- **"Уже пробовал"** → Чем это отличается
+- **"Не для меня"** → Для кого это (идеальный клиент)
+
+### Способы подачи
+- **FAQ секция** — прямые вопросы-ответы
+- **Отдельный блок "Это не для тебя, если..."** — антиквалификация
+- **Встроенные в текст** — предупреждаем возражения
+- **В отзывах** — "Я тоже сначала думал что..."
+- **Сравнительная таблица** — vs конкуренты/альтернативы
+
+---
+
+## 11. ФОРМАТЫ ОПЛАТЫ
+
+### Снижение барьера входа
+- **Рассрочка без %** — разбить на платежи
+- **Подписка** — ежемесячный платёж
+- **Тест за 1$** — символическая сумма
+- **Pay what you want** — назови свою цену (редко)
+- **Freemium** — базовое бесплатно
+
+### Повышение чека
+- **Upsell** — допродажа на чекауте
+- **Order bump** — галочка "добавить за X"
+- **Bundle** — пакетное предложение
+- **Downsell** — если отказался - предложить дешевле
+- **Cross-sell** — сопутствующие продукты
+
+---
+
+## 12. ТЕСТИРОВАНИЕ БЕЗ ПРОДУКТА
+
+### Способы валидации
+- **Landing page + waitlist** — собрать email'ы
+- **Fake door test** — кнопка "Купить" → страница "Скоро"
+- **Предзаказ с возвратом** — деньги вернём если не понравится
+- **Crowdfunding стиль** — "При 100 регистрациях запустим"
+- **Опрос целевой** — готовы ли заплатить X за Y?
+- **Интервью** — глубинные разговоры с ICP
+- **Конкурентный анализ** — что покупают у других
+
+### Метрики для оценки
+- **Конверсия в email** — % посетителей оставивших почту
+- **Клики на "Купить"** — даже если страница заглушка
+- **Scroll depth** — насколько глубоко читают
+- **Time on page** — сколько времени проводят
+- **Heatmaps** — куда кликают и смотрят
+
+---
+
+## 13. ТРИГГЕРЫ ДОВЕРИЯ
+
+### Технические
+- **SSL сертификат** — иконка замка
+- **Безопасная оплата** — логотипы платёжных систем
+- **Политика конфиденциальности** — ссылка в футере
+- **Юридические данные** — ИП/ООО, реквизиты
+
+### Социальные
+- **Реальный контакт** — телефон, telegram автора
+- **Фото офиса/команды** — если есть
+- **Ссылки на соцсети** — живые аккаунты
+- **Публичная персона** — автор = бренд
+
+### Контентные
+- **Детальное описание** — что внутри продукта
+- **Curriculum/программа** — модули и уроки
+- **Методология** — как это работает
+- **Кто автор** — биография, достижения
+- **Примеры результатов** — конкретные кейсы
+
+---
+
+## 14. ПЕРСОНАЛИЗАЦИЯ
+
+### Сегментация
+- **По уровню** — новичок/продвинутый
+- **По нише** — разные лендинги для разных ICP
+- **По источнику** — разный текст с разных каналов
+- **По поведению** — вернувшиеся vs новые
+
+### Динамический контент
+- **Имя в заголовке** — "Привет, Тимофей!"
+- **Город/локация** — "Для предпринимателей из Москвы"
+- **Релевантные кейсы** — похожие на посетителя
+- **Персонализированные бонусы** — по интересам
+
+---
+
+## 15. EXIT-INTENT И РЕТАРГЕТИНГ
+
+### При уходе со страницы
+- **Exit popup** — последний шанс оффер
+- **Скидка за подписку** — email в обмен на бонус
+- **Вопрос "Что остановило?"** — сбор возражений
+- **Countdown** — "Скидка действует 10 минут"
+- **Reminder** — "Ты забыл про корзину"
+
+### После визита
+- **Email-цепочка** — nurturing последовательность
+- **Retargeting ads** — догоняющая реклама
+- **SMS/push** — напоминание
+- **Abandoned cart** — письма о брошенной корзине
+
+---
+
+## 🔥 ТОП-10 БЫСТРЫХ ТЕСТОВ
+
+1. **Добавь таймер** — +15-30% к конверсии в среднем
+2. **Добавь отзывы с фото** — +34% по статистике
+3. **Добавь гарантию возврата** — +21% (Quick Sprout)
+4. **Смени текст кнопки на 1 лицо** — потенциально +90%
+5. **Добавь перечёркнутую цену** — якорь работает
+6. **Добавь "Осталось X мест"** — срочность
+7. **Добавь FAQ** — закрой возражения
+8. **Добавь бонусы со стоимостью** — perceived value
+9. **Сделай кнопку контрастной** — заметность
+10. **Добавь микрокопию под кнопкой** — снятие страхов
+
+---
+
+## Источники и статистика
+
+- Countdown таймеры увеличивают engagement до 30%
+- Cracku увеличил конверсию на 300% с таймером
+- 88% потребителей доверяют отзывам как личным рекомендациям
+- Продукты с 5+ отзывами покупают на 270% чаще
+- Добавление видимой гарантии даёт +21% к продажам
+- Гипер-персонализация может дать до 60% рост конверсии
+- Чёткий CTA может увеличить конверсию до 161%
+- Средняя конверсия лендинга — 5.89% (HubSpot 2024)
+- Хорошая конверсия — от 10% (Unbounce)
+
+---
+
+*Создано для курса по пет-проектам. Используй как чеклист при создании офферов.*`;
+
     const slides = document.querySelectorAll('.slide');
     const progress = document.getElementById('progress');
+    const mdContainer = document.getElementById('mdContainer');
+    const copyBtn = document.getElementById('copyBtn');
     let currentSlide = 0;
 
-    function updateURL(index) {
-        const url = new URL(window.location);
-        url.searchParams.set('slide', index);
-        window.history.pushState({}, '', url);
-    }
-
+    // SLIDER LOGIC
     function showSlide(index) {
         if (index < 0 || index >= slides.length) return;
         slides.forEach(s => s.classList.remove('active'));
         slides[index].classList.add('active');
         currentSlide = index;
         progress.style.width = `${((index + 1) / slides.length) * 100}%`;
-        updateURL(index);
+        
+        const url = new URL(window.location);
+        url.searchParams.set('slide', index);
+        window.history.pushState({}, '', url);
     }
 
+    // COPY LOGIC
+    function copyTactics() {
+        navigator.clipboard.writeText(TACTICS_MD).then(() => {
+            copyBtn.innerText = "СКОПИРОВАНО!";
+            copyBtn.classList.add('success');
+            setTimeout(() => {
+                copyBtn.innerText = "Копировать Markdown";
+                copyBtn.classList.remove('success');
+            }, 2000);
+        });
+    }
+
+    // INIT
     window.addEventListener('load', () => {
+        // Render Markdown
+        if (mdContainer) {
+            mdContainer.innerHTML = marked.parse(TACTICS_MD);
+        }
+
         const urlParams = new URLSearchParams(window.location.search);
         const slideParam = parseInt(urlParams.get('slide'));
         showSlide(isNaN(slideParam) ? 0 : slideParam);
