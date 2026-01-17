@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Синхронизация Фокуса</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600&family=Unbounded:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #0f0f11;
+            --text-main: #ffffff;
+            --text-muted: #e0e0e0; /* Сделал почти белым, чтобы не было серым */
+            --accent: #ccff00; 
+            --accent-dim: rgba(204, 255, 0, 0.1);
+            --danger: #ff4d4d;
+            --danger-dim: rgba(255, 77, 77, 0.1);
+            --surface: #1a1a1c;
+            --surface-light: #252528;
+            --link-color: #00e5ff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: var(--bg); color: var(--text-main); font-family: 'Manrope', sans-serif; overflow: hidden; height: 100vh; width: 100vw; }
+
+        .deck { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; visibility: hidden; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); transform: scale(0.98) translateY(20px); display: flex; flex-direction: column; justify-content: center; padding: 3rem 6rem; background: var(--bg); z-index: 1; }
+        .slide.active { opacity: 1; visibility: visible; transform: scale(1) translateY(0); z-index: 10; }
+
+        h1, h2, h3 { font-family: 'Unbounded', sans-serif; text-transform: uppercase; line-height: 1.1; letter-spacing: -0.02em; }
+        h1 { font-size: 4rem; color: var(--accent); margin-bottom: 1rem; }
+        h2 { font-size: 3rem; margin-bottom: 1rem; color: var(--accent); }
+        h3 { font-size: 1.4rem; margin-bottom: 0.8rem; color: #fff; }
+        
+        /* Принудительно белый текст везде */
+        p, li { font-size: 1.3rem; line-height: 1.5; color: #ffffff !important; max-width: 1100px; margin-bottom: 1rem; }
+        
+        .highlight { color: var(--text-main); font-weight: 600; }
+        .accent-text { color: var(--accent); }
+        .danger-text { color: var(--danger); }
+        
+        .tag { display: inline-block; background: var(--surface-light); color: #fff; padding: 0.5rem 1rem; border-radius: 4px; font-family: 'Unbounded', sans-serif; font-size: 0.8rem; margin-bottom: 1.5rem; text-transform: uppercase; }
+        .tag.danger { background: var(--danger-dim); color: var(--danger); }
+        
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; margin-top: 1.5rem; width: 100%; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-top: 1.5rem; width: 100%; }
+
+        .card { background: var(--surface); padding: 2rem; border-radius: 20px; border: 1px solid #333; position: relative; display: flex; flex-direction: column; }
+        .card.active { border-color: var(--accent); }
+        .card.danger { border-left: 4px solid var(--danger); }
+        
+        /* Стили для кейса с датами */
+        .case-date { font-family: 'Unbounded', sans-serif; font-size: 0.9rem; color: var(--accent); margin-bottom: 0.5rem; }
+        .case-value { font-family: 'Unbounded', sans-serif; font-size: 2.5rem; color: #fff; margin-bottom: 0.5rem; }
+        
+        .big-number { font-size: 5rem; font-family: 'Unbounded', sans-serif; color: var(--surface); -webkit-text-stroke: 2px var(--surface-light); position: absolute; right: 3rem; bottom: 2rem; z-index: -1; opacity: 0.4; }
+
+        /* Chart adjustments */
+        .chart-container { width: 100%; height: 320px; margin: 2rem 0; position: relative; }
+        svg { width: 100%; height: 100%; overflow: visible; }
+        .chart-path { fill: none; stroke: var(--accent); stroke-width: 4; stroke-linecap: round; filter: drop-shadow(0 0 10px var(--accent-dim)); }
+        .chart-label { font-family: 'Unbounded', sans-serif; fill: #fff; font-size: 14px; text-transform: uppercase; }
+
+        /* Heroes badges */
+        .hero-list { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+        .hero-badge { background: rgba(255,255,255,0.1); border: 1px solid var(--accent); color: #fff; padding: 0.8rem 1.5rem; border-radius: 50px; font-family: 'Unbounded', sans-serif; font-size: 1.1rem; }
+
+        /* Protocol styles */
+        .protocol-row { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding: 1rem 0; align-items: center; }
+        .protocol-time { font-family: 'Unbounded'; font-size: 1.5rem; color: var(--accent); }
+        
+        ul { list-style: none; }
+        li { font-size: 1.3rem; margin-bottom: 0.8rem; display: flex; align-items: start; color: #fff; }
+        li::before { content: "→"; color: var(--accent); margin-right: 1rem; font-family: 'Unbounded', sans-serif; flex-shrink: 0; }
+        
+        .progress-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: #222; z-index: 100; }
+        .progress { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s ease; }
+
+        @media (max-width: 768px) {
+            .grid, .grid-3 { grid-template-columns: 1fr; }
+            h1 { font-size: 3rem; }
+            h2 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+    <!-- 1. TITLE -->
+    <section class="slide active">
+        <div class="tag">REBOOT SESSION</div>
+        <h1>Синхронизация<br>фокуса</h1>
+        <p class="highlight" style="font-size: 2rem; margin-bottom: 0.5rem;">Как пройти «долину смерти» и не слить проект.</p>
+        <p style="margin-bottom: 3rem;">Урок не про теорию. Урок про то, как дожить до денег.</p>
+        
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #333; display: flex; align-items: center; gap: 2rem;">
+            <div>
+                <p class="highlight" style="margin-bottom: 0; font-family: 'Unbounded', sans-serif; font-size: 1rem;">Тимофей Корчагин</p>
+                <p style="margin-bottom: 0; color: var(--accent); font-family: 'Unbounded', sans-serif; font-size: 0.8rem;">@tkorchagin</p>
+            </div>
+            <div style="margin-left: auto; text-align: right;">
+                <p style="font-size: 0.8rem; letter-spacing: 0.2em; color: #fff; text-transform: uppercase;">MONEY MAKER<br>MODULE</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. CHART -->
+    <section class="slide">
+        <div class="tag danger">ДИАГНОЗ</div>
+        <h2>Где мы сейчас?</h2>
+        <div class="grid">
+            <div>
+                <p>11 участников — 5 домашек. Энергия упала. Это не вы ленивые, это физиология мозга.</p>
+                <p class="highlight" style="color: var(--accent);">3-я неделя — это яма. Мы здесь.</p>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <svg viewBox="0 0 1000 300" preserveAspectRatio="none">
+                <!-- Убрал линию оси снизу -->
+                <path d="M0,50 C200,50 300,220 500,220 C700,220 800,50 1000,20" class="chart-path" />
+                
+                <circle cx="0" cy="50" r="6" fill="#fff" />
+                <text x="10" y="30" class="chart-label">Старт</text>
+
+                <circle cx="500" cy="220" r="12" fill="var(--danger)" />
+                <text x="500" y="270" class="chart-label" text-anchor="middle" fill="var(--danger)" style="font-size: 18px; font-weight: bold;">🫣 ВЫ ЗДЕСЬ</text>
+
+                <circle cx="1000" cy="20" r="6" fill="#fff" />
+                <text x="920" y="10" class="chart-label">Деньги</text> <!-- Поднял выше -->
+            </svg>
+        </div>
+        <div class="big-number">01</div>
+    </section>
+
+    <!-- 3. HEROES -->
+    <section class="slide">
+        <div class="tag">PROOF OF WORK</div>
+        <h2>Герои недели</h2>
+        <p>Вы преодолели сопротивление. Вы — ядро группы. Задаете темп.</p>
+        
+        <div class="hero-list">
+            <div class="hero-badge">Соня Яровая</div>
+            <div class="hero-badge">Даша Маринина</div>
+            <div class="hero-badge">Дима Межов</div>
+            <div class="hero-badge">Дима Портыко</div>
+            <div class="hero-badge">Толя Шелиховский</div>
+        </div>
+        
+        <div class="card active" style="margin-top: 3rem; border-color: #444; background: transparent;">
+            <p style="margin: 0; font-size: 1.1rem; color: #fff;">Остальные — подтягиваемся. Место в топе еще есть.</p>
+        </div>
+        <div class="big-number">02</div>
+    </section>
+
+    <!-- 4. MY CASE -->
+    <section class="slide">
+        <div class="tag">ПРОЕКТ «ДНЕВНИЧОК»</div>
+        <h2>Как работает фокус</h2>
+        <p>Идея не испортилась. Просто сместился фокус. Вот цена расфокуса:</p>
+        
+        <div class="grid-3">
+            <div class="card">
+                <div class="case-date">ОКТЯБРЬ 2024</div>
+                <div class="case-value" style="color: var(--accent);">400к ₽/мес</div>
+                <p style="font-size: 1rem;">Пик формы</p>
+            </div>
+            <div class="card danger">
+                <div class="case-date" style="color: var(--danger);">СЕНТЯБРЬ 2025</div>
+                <div class="case-value" style="color: var(--danger);">40к ₽/мес</div>
+                <p style="font-size: 1rem;">Потеря фокуса на год</p>
+            </div>
+            <div class="card active">
+                <div class="case-date">СЕРЕДИНА ЯНВАРЯ 2026</div>
+                <div class="case-value">100к+ ₽</div>
+                <p style="font-size: 1rem;">Вернул фокус</p>
+            </div>
+        </div>
+        <div class="big-number">03</div>
+    </section>
+
+    <!-- 5. HOT SEATS -->
+    <section class="slide">
+        <div class="tag danger">LIVE</div>
+        <h2>Горячие стулья 🔥</h2>
+        <p>Вынимаем пробки. Разбор тех, кто застрял.</p>
+        
+        <div class="grid">
+            <div class="card active">
+                <h3>Правила игры:</h3>
+                <ul>
+                    <li>1. Я называю имя.</li>
+                    <li>2. Включаешь микрофон.</li>
+                    <li>3. Озвучиваешь <b>ОДИН</b> затык.</li>
+                </ul>
+            </div>
+            <div class="card danger" style="justify-content: center; text-align: center;">
+                <p style="font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--danger);">ЦЕЛЬ:</p>
+                <p style="font-size: 1.5rem; font-weight: bold; line-height: 1.3;">Найти решение за 3 минуты.<br>Сдать домашку завтра.</p>
+            </div>
+        </div>
+        <div class="big-number">04</div>
+    </section>
+
+    <!-- 6. BUDDY 2.0 -->
+    <section class="slide">
+        <div class="tag">НОВЫЕ ПРАВИЛА</div>
+        <h2>Бадди 2.0</h2>
+        <p class="highlight">Меняем правила. Теперь обязательные созвоны.</p>
+        
+        <div class="grid" style="grid-template-columns: 1fr 1.5fr;">
+            <!-- Левая часть - правило -->
+            <div class="card danger">
+                <h3 style="color: var(--danger);">ЖЕЛЕЗНОЕ ПРАВИЛО</h3>
+                <p style="font-size: 1.3rem; margin-top: 1rem;">Созвон каждый <b>ПОНЕДЕЛЬНИК</b>.</p>
+                <hr style="border: 0; border-top: 1px solid var(--danger); opacity: 0.5; margin: 1.5rem 0;">
+                <p>Договоритесь о времени прямо сейчас.</p>
+            </div>
+            
+            <!-- Правая часть - протокол -->
+            <div class="card active">
+                <h3>Протокол 15 минут</h3>
+                <div style="margin-top: 1rem;">
+                    <div class="protocol-row">
+                        <span class="protocol-time">05:00</span>
+                        <span>Твой питч (что сделал)</span>
+                    </div>
+                    <div class="protocol-row">
+                        <span class="protocol-time">02:00</span>
+                        <span>Напарник ищет «дыру»</span>
+                    </div>
+                    <div class="protocol-row">
+                        <span class="protocol-time">05:00</span>
+                        <span>Смена ролей</span>
+                    </div>
+                    <div class="protocol-row" style="border: none;">
+                        <span class="protocol-time">03:00</span>
+                        <span>План до субботы</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="big-number">05</div>
+    </section>
+
+    <!-- 7. RE-PAIR (SOFT) -->
+    <section class="slide">
+        <div class="tag">SYNC</div>
+        <h2>Синхронизация пар</h2>
+        
+        <div class="card active" style="margin-top: 2rem; border: none; padding: 4rem; text-align: center;">
+            <h3 style="margin-bottom: 2rem;">Проверка связи</h3>
+            <p style="font-size: 1.8rem;">Есть те, кто еще не списался?</p>
+            <p style="font-size: 1.3rem; margin-top: 1rem; color: #ccc !important;">(Обсудим голосом и решим вопрос)</p>
+        </div>
+        <div class="big-number">06</div>
+    </section>
+
+    <!-- 8. TRACTION MAP -->
+    <section class="slide">
+        <div class="tag">РИТМ</div>
+        <h2>Трекшн-карта</h2>
+        <p>Вводим общую таблицу ритма. Это визуальное топливо.</p>
+        
+        <div class="grid">
+            <div class="card active">
+                <h3>Колонки:</h3>
+                <ul>
+                    <li>1. Домашка (Готова / Нет)</li>
+                    <li>2. Созвон в понедельник (Был / Нет)</li>
+                </ul>
+            </div>
+            <div class="card" style="border-color: #444; justify-content: center;">
+                <h3>Зачем?</h3>
+                <p>Чтобы видеть, что группа жива. Когда другие гребут — грести легче.</p>
+                <p style="color: var(--accent); margin-top: 1.5rem;">Ссылку пришлю в чат.</p>
+            </div>
+        </div>
+        <div class="big-number">07</div>
+    </section>
+
+    <!-- 9. FINAL -->
+    <section class="slide">
+        <div class="tag">ИТОГ</div>
+        <h2>Не дай себе слиться</h2>
+        <p>Самое сложное — пережить первые 3 недели тишины.</p>
+        
+        <div style="margin-top: 3rem; padding-left: 2rem; border-left: 4px solid var(--accent);">
+            <p style="font-size: 1.6rem; margin-bottom: 1rem;">Сегодня мы перезагрузились.</p>
+            <p style="font-size: 1.4rem;">У вас есть напарник, есть план на понедельник и есть понимание, что ваши страхи — это просто химия мозга.</p>
+        </div>
+        
+        <p style="font-family: 'Unbounded'; font-size: 3rem; color: var(--accent); margin-top: 4rem;">РАБОТАЕМ.</p>
+        <div class="big-number">08</div>
+    </section>
+
+</div>
+
+<div class="progress-container"><div class="progress" id="progress"></div></div>
+
+<script>
+    const slides = document.querySelectorAll('.slide');
+    const progress = document.getElementById('progress');
+    let currentSlide = 0;
+
+    function updateURL(index) {
+        const url = new URL(window.location);
+        url.searchParams.set('slide', index);
+        window.history.pushState({}, '', url);
+    }
+
+    function showSlide(index) {
+        if (index < 0 || index >= slides.length) return;
+        slides.forEach(s => s.classList.remove('active'));
+        slides[index].classList.add('active');
+        currentSlide = index;
+        progress.style.width = `${((index + 1) / slides.length) * 100}%`;
+        updateURL(index);
+    }
+
+    window.addEventListener('load', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const slideParam = parseInt(urlParams.get('slide'));
+        showSlide(isNaN(slideParam) ? 0 : slideParam);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') showSlide(currentSlide + 1);
+        if (e.key === 'ArrowLeft') showSlide(currentSlide - 1);
+    });
+</script>
+
+</body>
+</html>
