@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Урок 5: Трафик и Первый контакт</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600&family=Unbounded:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #0f0f11;
+            --text-main: #ffffff;
+            --text-muted: #c0c0c0;
+            --accent: #ccff00; 
+            --accent-dim: rgba(204, 255, 0, 0.1);
+            --danger: #ff4d4d;
+            --danger-dim: rgba(255, 77, 77, 0.1);
+            --purple: #bf5af2;
+            --surface: #1a1a1c;
+            --surface-light: #252528;
+            --link-color: #00e5ff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: var(--bg); color: var(--text-main); font-family: 'Manrope', sans-serif; overflow: hidden; height: 100vh; width: 100vw; }
+
+        .deck { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+        .slide { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            opacity: 0; visibility: hidden; 
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); 
+            transform: scale(0.98) translateY(20px); 
+            display: flex; flex-direction: column; justify-content: center; 
+            padding: 3rem 6rem; background: var(--bg); z-index: 1; 
+        }
+        .slide.active { opacity: 1; visibility: visible; transform: scale(1) translateY(0); z-index: 10; }
+
+        h1, h2, h3, h4 { font-family: 'Unbounded', sans-serif; text-transform: uppercase; line-height: 1.1; letter-spacing: -0.02em; }
+        h1 { font-size: 4rem; color: var(--accent); margin-bottom: 1rem; }
+        h2 { font-size: 3rem; margin-bottom: 1.5rem; color: #fff; }
+        h3 { font-size: 1.4rem; margin-bottom: 0.8rem; color: #fff; }
+        h4 { font-size: 1.1rem; color: var(--accent); margin-bottom: 0.5rem; }
+        
+        p { font-size: 1.3rem; line-height: 1.5; color: var(--text-muted); max-width: 1100px; margin-bottom: 1rem; }
+        
+        .highlight { color: #fff; font-weight: 600; }
+        .accent-text { color: var(--accent); }
+        .purple-text { color: var(--purple); }
+        .danger-text { color: var(--danger); }
+        
+        a { color: var(--link-color); text-decoration: none; border-bottom: 1px dashed var(--link-color); transition: 0.2s; font-weight: 600; }
+        a:hover { color: #fff; border-bottom-color: #fff; background: rgba(0, 229, 255, 0.1); }
+
+        .tag { display: inline-block; background: var(--surface-light); color: #fff; padding: 0.5rem 1rem; border-radius: 4px; font-family: 'Unbounded', sans-serif; font-size: 0.8rem; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px;}
+        .tag.danger { background: var(--danger-dim); color: var(--danger); }
+        .tag.purple { background: rgba(191, 90, 242, 0.1); color: var(--purple); }
+        
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; margin-top: 1.5rem; width: 100%; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 1.5rem; width: 100%; }
+
+        .card { 
+            background: var(--surface); 
+            padding: 2rem; 
+            border-radius: 20px; 
+            border: 1px solid #333; 
+            position: relative; 
+            display: flex; flex-direction: column;
+            transition: 0.3s;
+        }
+        .card.active { border-color: var(--accent); }
+        .card.purple { border-color: var(--purple); }
+        .card.danger { border-left: 4px solid var(--danger); }
+        .card.dashed { border: 2px dashed #444; background: rgba(255, 255, 255, 0.02); }
+
+        .big-number { font-size: 6rem; font-family: 'Unbounded', sans-serif; color: var(--surface); -webkit-text-stroke: 2px var(--surface-light); position: absolute; right: 3rem; bottom: 2rem; z-index: -1; opacity: 0.4; pointer-events: none; }
+
+        ul.custom-list { list-style: none; padding: 0; }
+        ul.custom-list li { 
+            font-size: 1.3rem; margin-bottom: 1rem; display: flex; 
+            align-items: flex-start; color: var(--text-muted); line-height: 1.4;
+        }
+        ul.custom-list li b { color: #fff; margin-right: 0.5rem; }
+        ul.custom-list li::before { 
+            content: "→"; color: var(--accent); margin-right: 1rem; 
+            font-family: 'Unbounded', sans-serif; flex-shrink: 0; font-weight: bold; 
+        }
+
+        .btn-large {
+            display: inline-block; background: var(--accent); color: #000; 
+            font-family: 'Unbounded', sans-serif; font-size: 1.1rem; padding: 1.2rem 2rem; 
+            border-radius: 12px; margin-top: 1.5rem; text-decoration: none; transition: 0.2s; 
+            text-transform: uppercase; font-weight: 700; border: none; cursor: pointer;
+        }
+        .btn-large:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(204, 255, 0, 0.3); background: #fff; }
+
+        .progress-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: #222; z-index: 100; }
+        .progress { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s ease; }
+
+        @media (max-width: 768px) {
+            .slide { padding: 2rem; overflow-y: auto; display: block; }
+            .grid, .grid-3 { grid-template-columns: 1fr; }
+            h1 { font-size: 2.5rem; }
+            h2 { font-size: 1.8rem; }
+            .big-number { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+    <!-- 1. ЗАСТАВКА -->
+    <section class="slide active">
+        <div class="tag">УРОК 5</div>
+        <h1>Трафик:<br>Первый контакт</h1>
+        <p class="highlight" style="font-size: 2rem; margin-bottom: 0.5rem; color: #fff;">Пора ебошить.</p>
+        <p style="margin-bottom: 3rem;">У тебя есть оффер. Теперь нам нужна кровь для этого организма. Твоя задача на неделю — не «изучить маркетинг», а <b class="accent-text">запуститься</b>. Если к следующей субботе не будет кликов — ты зря потратил время.</p>
+        
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #333; display: flex; align-items: center; gap: 2rem;">
+            <div>
+                <p class="highlight" style="margin-bottom: 0; font-family: 'Unbounded', sans-serif; font-size: 1rem; color: #fff;">Тимофей Корчагин</p>
+                <p style="margin-bottom: 0; color: var(--accent); font-family: 'Unbounded', sans-serif; font-size: 0.8rem;">@tkorchagin</p>
+            </div>
+            <div style="margin-left: auto; text-align: right;">
+                <p style="font-size: 0.8rem; letter-spacing: 0.2em; color: var(--text-muted); text-transform: uppercase;">MONEY MAKER<br>MODULE</p>
+            </div>
+        </div>
+        <div class="big-number">01</div>
+    </section>
+
+    <!-- 2. РЕКАП -->
+    <section class="slide">
+        <div class="tag">ЧТО МЫ УЗНАЛИ 🔙</div>
+        <h2>Рекап прошлого урока</h2>
+        <p>Мы не начинаем с нуля. У тебя уже есть всё для рекламы:</p>
+        <div class="grid-3">
+            <div class="card active">
+                <h4>УРОК 3</h4>
+                <p style="color:#fff;"><b>Скрины конкурентов</b></p>
+                <p style="font-size: 1rem;">Ты знаешь, как выглядит их реклама. Мы будем делать лучше.</p>
+            </div>
+            <div class="card active">
+                <h4>УРОК 4</h4>
+                <p style="color:#fff;"><b>Формула PMHS</b></p>
+                <p style="font-size: 1rem;">Твой текст "Боль → Надежда → Решение" — это готовый пост.</p>
+            </div>
+            <div class="card active">
+                <h4>УРОК 4</h4>
+                <p style="color:#fff;"><b>Fake Door</b></p>
+                <p style="font-size: 1rem;">У тебя есть ссылка, куда вести людей (бот/сайт/оплата).</p>
+            </div>
+        </div>
+        <div class="big-number">02</div>
+    </section>
+
+    <!-- 3. КАРТА ИСТОЧНИКОВ -->
+    <section class="slide">
+        <div class="tag">СТРАТЕГИЯ ⚔️</div>
+        <h2>Выбираем оружие</h2>
+        <p>Не пытайся запустить всё сразу. Выбери ОДИН канал, который подходит под твой продукт.</p>
+        
+        <div class="card active">
+            <ul class="custom-list" style="margin-top: 1rem;">
+                <li><span><b>📸 Блогеры (Instagram Stories)</b> — Если важен визуал, эмоции и личное доверие.</span></li>
+                <li><span><b>📢 Посевы (Telegram Каналы)</b> — Если нужен текст, скорость и охват конкретных тусовок.</span></li>
+                <li><span><b>💎 TG Ads (Официальная реклама)</b> — Системный захват "горячей" аудитории конкурентов.</span></li>
+                <li><span><b>🔎 Яндекс.Директ</b> — Если у людей "горит" и они сами ищут решение в поиске.</span></li>
+                <li><span><b>🏷️ Авито</b> — Если твой продукт можно упаковать как понятную услугу.</span></li>
+            </ul>
+        </div>
+        <div class="big-number">03</div>
+    </section>
+
+    <!-- 4. БЛОГЕРЫ (ПРОТОКОЛ) -->
+    <section class="slide">
+        <div class="tag purple">ПРАВИЛА ИГРЫ 🤝</div>
+        <h2>Работа с людьми: Протокол</h2>
+        <p>Реклама у блогеров — это всегда хаос. Твоя задача — его упорядочить.</p>
+        
+        <div class="grid">
+            <div class="card purple">
+                <h3>Алгоритм действий:</h3>
+                <ul class="custom-list">
+                    <li><span><b>1. Папка "Админы":</b> Создай папку в TG. Складывай туда всех.</span></li>
+                    <li><span><b>2. Отложка:</b> Поставь отложенное сообщение админу: "Привет, пост через 2 часа, всё в силе?".</span></li>
+                    <li><span><b>3. Где искать:</b> <a href="https://t.me/otzovik_blogger" target="_blank" style="color:var(--purple); border-bottom:1px dashed var(--purple);">@otzovik_blogger</a>, <a href="https://t.me/fromBerek" target="_blank" style="color:var(--purple); border-bottom:1px dashed var(--purple);">@fromBerek</a>, <a href="https://t.me/badlistblogger" target="_blank" style="color:var(--purple); border-bottom:1px dashed var(--purple);">@badlistblogger</a>.</span></li>
+                    <li><span><b>4. Лайфхак:</b> Смотри раздел "Похожие каналы" в Телеграм — там часто спрятаны лучшие площадки.</span></li>
+                </ul>
+            </div>
+            <div class="card dashed">
+                <p><i>«Один фоллоуап может решить всё. Не додумывай за людей — напиши еще раз. Доверие юзера — это скорость твоего ответа».</i></p>
+            </div>
+        </div>
+        <div class="big-number">04</div>
+    </section>
+
+    <!-- 5. INSTAGRAM -->
+    <section class="slide">
+        <div class="tag purple">ИНСТРУМЕНТ №1 📸</div>
+        <h2>Блогеры в Instagram</h2>
+        <p class="highlight" style="color:#fff;">Визуал + Личная рекомендация.</p>
+        
+        <div class="grid">
+            <div class="card purple">
+                <h3>Важно:</h3>
+                <p>Блогер должен снять сторис сам. Но ты обязан дать четкое ТЗ и <b>примеры</b>.</p>
+                <p style="margin-top:0.5rem;">Покажи референсы: "Хочу вот такую эмоцию" или "Покажи экран вот так". Не надейся, что он сам поймет.</p>
+            </div>
+            <div class="card active">
+                <h3 class="accent-text">Шаблон ТЗ</h3>
+                <p>Забирай структуру, по которой мы закупали рекламу для бота "Дневничок".</p>
+                <a href="https://tkorchagin.notion.site/98aad73e57a847d8a12ade2874ecb20c" target="_blank" class="btn-large">🔗 Открыть пример в Notion</a>
+            </div>
+        </div>
+        <div class="big-number">05</div>
+    </section>
+
+    <!-- 6. TG SEEDINGS -->
+    <section class="slide">
+        <div class="tag purple">ИНСТРУМЕНТ №2 📢</div>
+        <h2>Посевы в Telegram Каналах</h2>
+        <p class="highlight" style="color:#fff;">Текст + Скорость.</p>
+        
+        <div class="card purple" style="padding: 2rem;">
+            <h3>Нюансы работы:</h3>
+            <ul class="custom-list" style="margin-top: 1.5rem;">
+                <li><span><b>Просто ссылка:</b> В посте ставишь обычную ссылку на бота/канал.</span></li>
+                <li><span><b>Проверка ботов:</b> Обязательно проверяй канал через <a href="https://tgstat.ru" target="_blank" style="color:var(--purple); border-color:var(--purple);">TGStat</a>. Если график подписчиков "пила" — там боты.</span></li>
+                <li><span><b>Хук решает:</b> В ТГ сканируют заголовки. Картинка вторична.</span></li>
+            </ul>
+        </div>
+        <div class="big-number">06</div>
+    </section>
+
+    <!-- 7. TG ADS -->
+    <section class="slide">
+        <div class="tag">ИНСТРУМЕНТ №3 💎</div>
+        <h2>Официальная реклама (TG Ads)</h2>
+        <p class="highlight" style="color:#fff;">Системный перехват аудитории.</p>
+        
+        <div class="grid">
+            <div class="card active" style="border-color: var(--link-color);">
+                <h3 style="color:var(--link-color);">Как это работает:</h3>
+                <p>Ты выбираешь каналы конкурентов. Люди там уже "горячие". Ты показываешь им свое объявление.</p>
+            </div>
+            <div class="card active">
+                <h3 style="color:#fff;">Важные факты:</h3>
+                <ul class="custom-list">
+                    <li><span><b>Только Non-Premium:</b> Рекламу видят только пользователи БЕЗ Premium (а это 95% людей).</span></li>
+                    <li><span><b>Модерация:</b> Она есть. И она строгая. Запускай заранее.</span></li>
+                </ul>
+            </div>
+        </div>
+        <div class="big-number">07</div>
+    </section>
+
+    <!-- 8. DIRECT -->
+    <section class="slide">
+        <div class="tag">ИНСТРУМЕНТ №4 🔎</div>
+        <h2>Яндекс.Директ</h2>
+        <p class="highlight" style="color:#fff;">Работа с болью "Здесь и сейчас".</p>
+        
+        <div class="grid">
+            <div class="card active" style="border-color: #ffcc00;">
+                <h3 style="color:#ffcc00;">Когда использовать?</h3>
+                <p>Когда проблему реально ищут. Люди вбивают боль в поиск.</p>
+                <div style="margin-top: 1.5rem;">
+                    <a href="https://wordstat.yandex.ru/" target="_blank" class="btn-large" style="background: transparent; border: 1px solid #ffcc00; color:#ffcc00; padding: 0.8rem 1.5rem; font-size: 1rem;">🔎 Открыть Wordstat</a>
+                </div>
+            </div>
+            <div class="card active">
+                <h3>Пример стратегии:</h3>
+                <ul class="custom-list">
+                    <li><span><i>"Как вернуть девушку"</i> → Курс/Бот по отношениям.</span></li>
+                    <li><span><i>"Образец договора аренды"</i> → Генератор договоров.</span></li>
+                </ul>
+            </div>
+        </div>
+        <div class="big-number">08</div>
+    </section>
+
+    <!-- 9. AVITO -->
+    <section class="slide">
+        <div class="tag purple">ИНСТРУМЕНТ №5 🏷️</div>
+        <h2>Авито</h2>
+        <p class="highlight" style="color:#fff;">Упаковка продукта в услугу.</p>
+        
+        <div class="card purple">
+            <h3>Хакинг реальности:</h3>
+            <p>Здесь люди готовы платить деньги за решение, а не за софт. Продай им результат.</p>
+            
+            <div class="grid" style="margin-top: 1.5rem;">
+                <div class="card dashed">
+                    <p style="color:var(--text-muted);">Вместо "Доступ к ИИ-конструктору"...</p>
+                </div>
+                <div class="card active" style="background: rgba(191, 90, 242, 0.1); border-color: var(--purple);">
+                    <p style="color:#fff;"><b>"Помогу составить грамотный договор аренды"</b></p>
+                </div>
+            </div>
+            <p style="margin-top: 1rem;">Запусти объявление → Получи заявку → Реши проблему (своим же инструментом).</p>
+        </div>
+        <div class="big-number">09</div>
+    </section>
+
+    <!-- 10. CREATIVE ASSEMBLY (SIMPLIFIED) -->
+    <section class="slide">
+        <div class="tag">КОНСТРУКТОР 🧩</div>
+        <h2>Формула креатива</h2>
+        <p class="highlight" style="color:#fff;">Не надо быть дизайнером. Просто соедини три части.</p>
+
+        <div class="grid-3" style="margin-top: 3rem;">
+            <div class="card dashed" style="text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🎣</div>
+                <h3 style="color:#fff; margin-bottom: 0.5rem;">1. ХУК</h3>
+                <p style="font-size: 0.9rem; color:var(--text-muted);">Заголовок из Урока 4</p>
+            </div>
+            <div class="card dashed" style="text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🖼️</div>
+                <h3 style="color:#fff; margin-bottom: 0.5rem;">2. КАРТИНКА</h3>
+                <p style="font-size: 0.9rem; color:var(--text-muted);">Скриншот из Урока 3</p>
+            </div>
+            <div class="card active" style="text-align: center; border-color: var(--accent);">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🚀</div>
+                <h3 style="color:var(--accent); margin-bottom: 0.5rem;">3. РЕКЛАМА</h3>
+                <p style="font-size: 0.9rem;">Готовый пост</p>
+            </div>
+        </div>
+        <div class="big-number">10</div>
+    </section>
+
+    <!-- 11. RHYTHM -->
+    <section class="slide">
+        <div class="tag">РИТМ ⚡</div>
+        <h2>Твой график «Ебошить»</h2>
+        <div class="grid">
+            <div class="card active">
+                <ul class="custom-list">
+                    <li><span><b>СБ/ВС:</b> Выбор канала. Поиск 10-15 площадок. Письма админам.</span></li>
+                    <li><span><b>ПОНЕДЕЛЬНИК:</b> Оплата размещений. Запуск модерации.</span></li>
+                    <li><span><b>ВТ-ЧТ:</b> Контроль выходов. Пинги админов ("Всё в силе?").</span></li>
+                    <li><span><b>ПЯТНИЦА:</b> Сбор статистики. Считаем цену клика.</span></li>
+                </ul>
+            </div>
+            <div class="card danger">
+                <h3>Бюджет теста:</h3>
+                <p style="font-size: 2.5rem; color: var(--accent);">5 000 — 10 000 ₽</p>
+                <p>Мы покупаем данные. Нам нужны первые 100-200 кликов.</p>
+            </div>
+        </div>
+        <div class="big-number">11</div>
+    </section>
+
+    <!-- 12. HOMEWORK -->
+    <section class="slide">
+        <div class="tag">ИТОГ 🏠</div>
+        <h2>Домашнее задание</h2>
+        <div class="grid">
+            <div class="card active">
+                <h3>Цель недели:</h3>
+                <p style="margin-bottom: 1.5rem;">Получить <b>ПЕРВЫЕ ДАННЫЕ</b> от рынка.</p>
+                
+                <ul class="custom-list">
+                    <li><span>Выбери 1 основной канал.</span></li>
+                    <li><span>Подготовь материалы (Пост / ТЗ / Объявление).</span></li>
+                    <li><span>Соверши действие: Оплати рекламу.</span></li>
+                    <li><span>Заполни план и факт в таблице.</span></li>
+                </ul>
+                <a href="https://docs.google.com/spreadsheets/d/19VO_YG3gpXGBmBTzuLBIrM9kkseKvqfUrcjdjqMn1qM/edit?gid=1328804724#gid=1328804724" target="_blank" class="btn-large">📝 Открыть таблицу запуска</a>
+            </div>
+            <div class="card dashed">
+                <h3 class="accent-text">Финал блока:</h3>
+                <p style="color:#fff;">Следующая неделя — это момент истины.</p>
+                <p>Мы будем смотреть на твои цифры. Продажи — это действия, а не вдохновение.</p>
+            </div>
+        </div>
+        <div class="big-number">12</div>
+    </section>
+
+</div>
+
+<div class="progress-container"><div class="progress" id="progress"></div></div>
+
+<script>
+    const slides = document.querySelectorAll('.slide');
+    const progress = document.getElementById('progress');
+    let currentSlide = 0;
+
+    function updateURL(index) {
+        const url = new URL(window.location);
+        url.searchParams.set('slide', index);
+        window.history.pushState({}, '', url);
+    }
+
+    function showSlide(index) {
+        if (index < 0 || index >= slides.length) return;
+        
+        slides.forEach(s => s.classList.remove('active'));
+        slides[index].classList.add('active');
+        currentSlide = index;
+        
+        if (progress) {
+            progress.style.width = `${((index + 1) / slides.length) * 100}%`;
+        }
+        
+        updateURL(index);
+    }
+
+    // INIT
+    window.addEventListener('load', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const slideParam = parseInt(urlParams.get('slide'));
+        showSlide(isNaN(slideParam) ? 0 : slideParam);
+    });
+
+    // NAVIGATION
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.code === 'ArrowRight' || e.key === ' ' || e.code === 'Space') {
+            showSlide(currentSlide + 1);
+        }
+        if (e.key === 'ArrowLeft' || e.code === 'ArrowLeft') {
+            showSlide(currentSlide - 1);
+        }
+    });
+</script>
+
+</body>
+</html>
